@@ -147,27 +147,7 @@ export default function LoginPage() {
             Enter credentials to access your visa applications
           </p>
 
-          {/* Quick Login for Development */}
-          <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-            <p className="text-xs text-blue-700 font-medium mb-2">Quick Login (Dev Only)</p>
-            <button
-              type="button"
-              onClick={() => {
-                setEmail("applicant@test.com");
-                setPassword("GhanaVisa2026!");
-              }}
-              className="w-full text-left px-3 py-2 bg-white border border-blue-300 rounded-md hover:bg-blue-50 transition-colors"
-            >
-              <div className="flex items-center gap-2">
-                <User size={16} className="text-blue-600" />
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-gray-900">John Applicant</p>
-                  <p className="text-xs text-gray-500">applicant@test.com</p>
-                </div>
-              </div>
-            </button>
-          </div>
-
+          
           <form onSubmit={handleSubmit} className="space-y-5">
             <Input
               label="Email Address"

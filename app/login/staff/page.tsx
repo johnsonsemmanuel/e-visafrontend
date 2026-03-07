@@ -25,15 +25,6 @@ const roleRedirect: Record<string, string> = {
   mfa_reviewer: "/dashboard/mfa",
 };
 
-const quickLogins = [
-  { name: "Kwame Mensah", email: "gis.reviewer@evisa.gov.gh", role: "GIS Reviewer", color: "emerald" },
-  { name: "Ama Owusu", email: "gis.approver@evisa.gov.gh", role: "GIS Approver", color: "emerald" },
-  { name: "Kofi Asante", email: "gis.admin@evisa.gov.gh", role: "GIS Admin", color: "emerald" },
-  { name: "Efua Dankwa", email: "mfa.reviewer@evisa.gov.gh", role: "MFA Reviewer", color: "blue" },
-  { name: "Yaw Boateng", email: "mfa.approver@evisa.gov.gh", role: "MFA Approver", color: "blue" },
-  { name: "Akua Frimpong", email: "mfa.admin@evisa.gov.gh", role: "MFA Admin", color: "blue" },
-  { name: "System Admin", email: "admin@evisa.gov.gh", role: "Super Admin", color: "purple" },
-];
 
 export default function StaffLoginPage() {
   const { login } = useAuth();
@@ -167,44 +158,7 @@ export default function StaffLoginPage() {
             Enter your staff credentials to access the portal
           </p>
 
-          {/* Quick Login for Development */}
-          <div className="mb-6 p-4 bg-gradient-to-br from-teal-50 to-blue-50 border border-teal-200 rounded-lg">
-            <p className="text-xs text-teal-700 font-semibold mb-3">Quick Login (Dev Only)</p>
-            <div className="grid grid-cols-1 gap-2 max-h-96 overflow-y-auto">
-              {quickLogins.map((account) => (
-                <button
-                  key={account.email}
-                  type="button"
-                  onClick={() => {
-                    setEmail(account.email);
-                    setPassword("GhanaVisa2026!");
-                  }}
-                  className={`w-full text-left px-3 py-2.5 bg-white border-2 rounded-lg hover:shadow-md transition-all ${
-                    account.color === "emerald"
-                      ? "border-emerald-300 hover:border-emerald-400 hover:bg-emerald-50"
-                      : account.color === "blue"
-                      ? "border-blue-300 hover:border-blue-400 hover:bg-blue-50"
-                      : "border-purple-300 hover:border-purple-400 hover:bg-purple-50"
-                  }`}
-                >
-                  <div className="flex items-center gap-2">
-                    <Briefcase size={16} className={`${
-                      account.color === "emerald"
-                        ? "text-emerald-600"
-                        : account.color === "blue"
-                        ? "text-blue-600"
-                        : "text-purple-600"
-                    }`} />
-                    <div className="flex-1">
-                      <p className="text-sm font-semibold text-gray-900">{account.name}</p>
-                      <p className="text-xs text-gray-500">{account.role}</p>
-                    </div>
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
-
+          
           <form onSubmit={handleSubmit} className="space-y-5">
             <Input
               label="Staff Email"
