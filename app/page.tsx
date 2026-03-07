@@ -67,12 +67,7 @@ export default function Home() {
   const stats = useInView();
   const faq = useInView();
 
-  useEffect(() => {
-    if (!loading && isAuthenticated && user) {
-      router.replace(roleRedirect[user.role] || "/dashboard/applicant");
-    }
-  }, [loading, isAuthenticated, user, router]);
-
+  
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 60);
     window.addEventListener("scroll", onScroll, { passive: true });
