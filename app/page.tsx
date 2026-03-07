@@ -1,65 +1,656 @@
-import Image from "next/image";
+"use client";
+
+import Link from "next/link";
+import { useAuth } from "@/lib/auth";
+import { useRouter } from "next/navigation";
+import { useEffect, useState, useRef } from "react";
+import {
+  ArrowRight,
+  CheckCircle2,
+  Clock,
+  FileText,
+  Globe,
+  Shield,
+  CreditCard,
+  Plane,
+  Users,
+  ChevronDown,
+  Star,
+  MapPin,
+  HeartHandshake,
+  Phone,
+  Mail,
+  ChevronRight,
+  Menu,
+  X,
+} from "lucide-react";
+
+const roleRedirect: Record<string, string> = {
+  applicant: "/dashboard/applicant",
+  gis_officer: "/dashboard/gis",
+  mfa_reviewer: "/dashboard/mfa",
+  admin: "/dashboard/admin",
+};
+
+const DESTINATIONS = [
+  "Accra", "Cape Coast", "Kumasi", "Tamale", "Elmina",
+  "Kakum", "Mole Park", "Ada Foah", "Volta Region", "Busua Beach",
+];
+
+function useInView(threshold = 0.15) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [inView, setInView] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      ([e]) => { if (e.isIntersecting) { setInView(true); obs.disconnect(); } },
+      { threshold }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [threshold]);
+  return { ref, inView };
+}
 
 export default function Home() {
+  const { user, isAuthenticated, loading } = useAuth();
+  const router = useRouter();
+  const [scrolled, setScrolled] = useState(false);
+  const [destIndex, setDestIndex] = useState(0);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
+
+  const howItWorks = useInView();
+  const visaTypes = useInView();
+  const whyGhana = useInView();
+  const stats = useInView();
+  const faq = useInView();
+
+  useEffect(() => {
+    if (!loading && isAuthenticated && user) {
+      router.replace(roleRedirect[user.role] || "/dashboard/applicant");
+    }
+  }, [loading, isAuthenticated, user, router]);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 60);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setDestIndex((prev) => (prev + 1) % DESTINATIONS.length);
+    }, 2500);
+    return () => clearInterval(interval);
+  }, []);
+
+  const faqs = [
+    { q: "Who needs a visa to enter Ghana?", a: "Citizens of most countries require a visa. ECOWAS nationals are exempt. Check our requirements page for your specific country." },
+    { q: "How long does the e-Visa process take?", a: "Standard processing takes 3–5 business days. Express processing is available for urgent travel within 24–48 hours." },
+    { q: "What documents do I need?", a: "A valid passport (6+ months validity), passport photo, travel itinerary, proof of accommodation, and yellow fever vaccination certificate." },
+    { q: "Can I extend my visa while in Ghana?", a: "Yes. Visit the nearest Ghana Immigration Service office before your visa expires to apply for an extension." },
+    { q: "Is my payment and personal data secure?", a: "Absolutely. All data is encrypted with bank-level SSL security. We comply with international data protection standards." },
+  ];
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+    <div className="min-h-screen bg-white">
+      {/* ─── Navigation ─── */}
+      <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? "bg-white/95 backdrop-blur-lg shadow-sm border-b border-gray-100" : "bg-transparent"}`}>
+        <div className="max-w-7xl mx-auto px-5 lg:px-8">
+          <div className="flex items-center justify-between h-18 py-4">
+            <Link href="/" className="flex items-center gap-3">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/gis-logo.png" alt="Republic of Ghana" width={40} height={40} className="drop-shadow-md" />
+              <div className="hidden sm:block">
+                <p className={`text-sm font-bold tracking-wide leading-tight ${scrolled ? "text-gray-900" : "text-white"}`}>
+                  Republic of Ghana
+                </p>
+                <p className={`text-[10px] tracking-widest uppercase ${scrolled ? "text-gray-400" : "text-white/50"}`}>
+                  Electronic Visa Portal
+                </p>
+              </div>
+            </Link>
+
+            {/* Desktop nav */}
+            <div className="hidden md:flex items-center gap-1">
+              {[
+                { label: "Check Eligibility", href: "/check-eligibility" },
+                { label: "Visa Types", href: "#visa-types" },
+                { label: "How It Works", href: "#how-it-works" },
+                { label: "Track Status", href: "/track" },
+              ].map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  className={`text-sm font-medium px-3.5 py-2 rounded-lg transition-colors ${scrolled ? "text-gray-600 hover:text-gray-900 hover:bg-gray-50" : "text-white/70 hover:text-white hover:bg-white/10"}`}
+                >
+                  {item.label}
+                </Link>
+              ))}
+              <div className="w-px h-6 bg-gray-200/30 mx-2" />
+              <Link
+                href="/login"
+                className={`text-sm font-medium px-3.5 py-2 rounded-lg transition-colors ${scrolled ? "text-gray-600 hover:text-gray-900" : "text-white/70 hover:text-white"}`}
+              >
+                Sign In
+              </Link>
+              <Link
+                href="/register"
+                className="inline-flex items-center gap-2 bg-[#006B3F] hover:bg-[#005A34] text-white text-sm font-semibold px-5 py-2.5 rounded-lg transition-all shadow-lg shadow-[#006B3F]/20 ml-1"
+              >
+                Apply Now <ArrowRight size={14} />
+              </Link>
+            </div>
+
+            {/* Mobile toggle */}
+            <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className={`md:hidden p-2 rounded-lg ${scrolled ? "text-gray-700" : "text-white"}`}>
+              {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
+            </button>
+          </div>
+        </div>
+
+        {/* Mobile menu */}
+        {mobileMenuOpen && (
+          <div className="md:hidden bg-white border-t border-gray-100 shadow-xl animate-slide-down">
+            <div className="px-5 py-4 space-y-1">
+              {["Visa Types|#visa-types", "How It Works|#how-it-works", "Requirements|/requirements", "Track Status|/track", "Sign In|/login"].map((item) => {
+                const [label, href] = item.split("|");
+                return (
+                  <Link key={href} href={href} onClick={() => setMobileMenuOpen(false)} className="block px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-lg">
+                    {label}
+                  </Link>
+                );
+              })}
+              <Link href="/register" onClick={() => setMobileMenuOpen(false)} className="block text-center bg-[#006B3F] text-white text-sm font-semibold px-4 py-3 rounded-lg mt-3">
+                Apply Now
+              </Link>
+            </div>
+          </div>
+        )}
+      </nav>
+
+      {/* ═══════════════════ HERO ═══════════════════ */}
+      <section className="relative min-h-screen flex items-center overflow-hidden">
+        <iframe
+          className="absolute inset-0 w-full h-full object-cover z-0"
+          src="https://www.youtube.com/embed/Mj6W3w1Eeys?autoplay=1&mute=1&loop=1&playlist=Mj6W3w1Eeys&controls=0&showinfo=0&modestbranding=1&iv_load_policy=3&rel=0"
+          title="Ghana Tourism Video"
+          frameBorder="0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowFullScreen
         />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+        <div className="absolute inset-0 z-[1] bg-gradient-to-b from-black/60 via-black/50 to-black/70" />
+
+        {/* Ghana flag accent strip at the very top */}
+        <div className="absolute top-0 left-0 right-0 z-[2] flex h-1">
+          <div className="flex-1 bg-[#CE1126]" />
+          <div className="flex-1 bg-[#C8962E]" />
+          <div className="flex-1 bg-[#006B3F]" />
+        </div>
+
+        <div className="relative z-10 max-w-7xl mx-auto px-5 lg:px-8 w-full pt-32 pb-20">
+          <div className="max-w-3xl">
+            <div className="animate-fade-in-up mb-6">
+              <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/15 rounded-full px-4 py-2">
+                <div className="w-2 h-2 bg-[#C8962E] rounded-full animate-pulse" />
+                <span className="text-white/80 text-xs font-semibold tracking-wider uppercase">
+                  Official Government Portal
+                </span>
+              </div>
+            </div>
+
+            <h1 className="animate-fade-in-up delay-100 leading-[1.1] mb-6">
+              <span className="block text-xl sm:text-2xl font-medium text-white/70 mb-3">Your Gateway to Ghana</span>
+              <span className="block text-5xl sm:text-6xl lg:text-7xl font-extrabold text-white tracking-tight">
+                e-Visa <span className="bg-gradient-to-r from-[#C8962E] via-[#D4A94B] to-[#C8962E] bg-clip-text text-transparent">Portal</span>
+              </span>
+            </h1>
+
+            <div className="animate-fade-in-up delay-200 flex items-center gap-3 mb-6">
+              <div className="h-px w-10 bg-gradient-to-r from-[#CE1126] via-[#C8962E] to-[#006B3F]" />
+              <p className="text-base sm:text-lg text-white/60">
+                Discover{" "}
+                <span key={destIndex} className="inline-block font-bold text-[#C8962E] transition-all duration-500">
+                  {DESTINATIONS[destIndex]}
+                </span>
+              </p>
+            </div>
+
+            <p className="animate-fade-in-up delay-300 text-base sm:text-lg text-white/50 mb-10 max-w-xl leading-relaxed">
+              Apply for your Ghana electronic visa online. Fast, secure, and fully digital — 
+              processed in as little as 3 business days.
+            </p>
+
+            <div className="animate-fade-in-up delay-400 flex flex-wrap gap-4">
+              <Link
+                href="/register"
+                className="group inline-flex items-center gap-2.5 bg-[#006B3F] hover:bg-[#005A34] text-white font-bold px-8 py-4 rounded-xl transition-all shadow-xl shadow-[#006B3F]/30 text-sm sm:text-base"
+              >
+                Start Your Application
+                <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+              </Link>
+              <Link
+                href="/track"
+                className="inline-flex items-center gap-2 border-2 border-white/20 text-white/80 hover:text-white hover:border-white/40 hover:bg-white/5 font-semibold px-7 py-4 rounded-xl transition-all text-sm sm:text-base"
+              >
+                Track Application
+              </Link>
+            </div>
+
+          </div>
+        </div>
+
+        {/* Scroll indicator */}
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 animate-float">
+          <ChevronDown size={24} className="text-white/30" />
+        </div>
+      </section>
+
+      {/* ═══════════════════ HOW IT WORKS ═══════════════════ */}
+      <section id="how-it-works" className="py-24 lg:py-32 bg-white" ref={howItWorks.ref}>
+        <div className="max-w-7xl mx-auto px-5 lg:px-8">
+          <div className={`text-center mb-16 ${howItWorks.inView ? "animate-slide-up" : "opacity-0"}`}>
+            <div className="inline-flex items-center gap-2 bg-[#006B3F]/5 border border-[#006B3F]/10 rounded-full px-4 py-1.5 mb-4">
+              <Clock size={14} className="text-[#006B3F]" />
+              <span className="text-[#006B3F] text-xs font-semibold uppercase tracking-wider">Simple Process</span>
+            </div>
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-4">
+              Get Your Visa in <span className="text-[#006B3F]">3 Easy Steps</span>
+            </h2>
+            <p className="text-gray-500 max-w-lg mx-auto">
+              Our streamlined digital process makes applying for your Ghana visa quick and hassle-free.
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8 lg:gap-12">
+            {[
+              {
+                step: "01",
+                icon: <FileText size={28} />,
+                title: "Fill Application",
+                desc: "Complete the online form with your personal details, travel plans, and upload required documents.",
+                color: "#CE1126",
+                delay: "delay-100",
+              },
+              {
+                step: "02",
+                icon: <CreditCard size={28} />,
+                title: "Pay & Submit",
+                desc: "Make a secure online payment. Your application is instantly submitted for processing.",
+                color: "#C8962E",
+                delay: "delay-300",
+              },
+              {
+                step: "03",
+                icon: <CheckCircle2 size={28} />,
+                title: "Receive e-Visa",
+                desc: "Get your approved e-Visa via email. Print it or save digitally for your trip to Ghana.",
+                color: "#006B3F",
+                delay: "delay-500",
+              },
+            ].map((item) => (
+              <div
+                key={item.step}
+                className={`relative group ${howItWorks.inView ? `animate-slide-up ${item.delay}` : "opacity-0"}`}
+              >
+                <div className="bg-white rounded-2xl p-8 border border-gray-100 hover:border-gray-200 hover:shadow-xl transition-all duration-300 h-full">
+                  <div className="flex items-center justify-between mb-6">
+                    <div
+                      className="w-14 h-14 rounded-2xl flex items-center justify-center transition-transform group-hover:scale-110"
+                      style={{ backgroundColor: `${item.color}10`, color: item.color }}
+                    >
+                      {item.icon}
+                    </div>
+                    <span className="text-5xl font-black text-gray-100 group-hover:text-gray-200 transition-colors">
+                      {item.step}
+                    </span>
+                  </div>
+                  <h3 className="text-lg font-bold text-gray-900 mb-2">{item.title}</h3>
+                  <p className="text-sm text-gray-500 leading-relaxed">{item.desc}</p>
+                </div>
+                {item.step !== "03" && (
+                  <div className="hidden md:block absolute top-1/2 -right-6 lg:-right-8 text-gray-200">
+                    <ChevronRight size={24} />
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════════════ VISA TYPES ═══════════════════ */}
+      <section id="visa-types" className="py-24 lg:py-32 bg-[#FAFBFC]" ref={visaTypes.ref}>
+        <div className="max-w-7xl mx-auto px-5 lg:px-8">
+          <div className={`text-center mb-16 ${visaTypes.inView ? "animate-slide-up" : "opacity-0"}`}>
+            <div className="inline-flex items-center gap-2 bg-[#C8962E]/8 border border-[#C8962E]/15 rounded-full px-4 py-1.5 mb-4">
+              <Globe size={14} className="text-[#C8962E]" />
+              <span className="text-[#C8962E] text-xs font-semibold uppercase tracking-wider">Visa Categories</span>
+            </div>
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-4">
+              Choose Your <span className="text-[#C8962E]">Visa Type</span>
+            </h2>
+            <p className="text-gray-500 max-w-lg mx-auto">
+              Select the visa category that best matches your purpose of travel to Ghana.
+            </p>
+          </div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[
+              {
+                icon: <Plane size={24} />,
+                title: "Tourist Visa",
+                duration: "Up to 90 days",
+                price: "From $60",
+                desc: "For leisure, sightseeing, and visiting friends or family.",
+                color: "#006B3F",
+                popular: true,
+              },
+              {
+                icon: <Users size={24} />,
+                title: "Business Visa",
+                duration: "Up to 90 days",
+                price: "From $100",
+                desc: "For business meetings, conferences, and commercial activities.",
+                color: "#C8962E",
+                popular: false,
+              },
+              {
+                icon: <Globe size={24} />,
+                title: "Transit Visa",
+                duration: "Up to 48 hours",
+                price: "From $40",
+                desc: "For travelers passing through Ghana to another destination.",
+                color: "#2E6B96",
+                popular: false,
+              },
+              {
+                icon: <HeartHandshake size={24} />,
+                title: "Diplomatic Visa",
+                duration: "As required",
+                price: "Varies",
+                desc: "For diplomatic passport holders on official government business.",
+                color: "#CE1126",
+                popular: false,
+              },
+            ].map((visa, i) => (
+              <div
+                key={visa.title}
+                className={`relative bg-white rounded-2xl p-6 border border-gray-100 hover:shadow-xl hover:border-gray-200 transition-all duration-300 group ${visaTypes.inView ? `animate-slide-up delay-${(i + 1) * 200}` : "opacity-0"}`}
+              >
+                {visa.popular && (
+                  <div className="absolute -top-3 left-6 bg-[#006B3F] text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+                    Most Popular
+                  </div>
+                )}
+                <div
+                  className="w-12 h-12 rounded-xl flex items-center justify-center mb-5 group-hover:scale-110 transition-transform"
+                  style={{ backgroundColor: `${visa.color}10`, color: visa.color }}
+                >
+                  {visa.icon}
+                </div>
+                <h3 className="text-base font-bold text-gray-900 mb-1">{visa.title}</h3>
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="text-xs font-medium text-gray-400">{visa.duration}</span>
+                  <span className="w-1 h-1 bg-gray-300 rounded-full" />
+                  <span className="text-xs font-bold" style={{ color: visa.color }}>{visa.price}</span>
+                </div>
+                <p className="text-sm text-gray-500 leading-relaxed mb-5">{visa.desc}</p>
+                <Link
+                  href="/register"
+                  className="inline-flex items-center gap-1.5 text-sm font-semibold transition-colors group-hover:gap-2.5"
+                  style={{ color: visa.color }}
+                >
+                  Apply Now <ArrowRight size={14} />
+                </Link>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════════════ WHY GHANA ═══════════════════ */}
+      <section className="py-24 lg:py-32 bg-white" ref={whyGhana.ref}>
+        <div className="max-w-7xl mx-auto px-5 lg:px-8">
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
+            <div className={whyGhana.inView ? "animate-slide-in-left" : "opacity-0"}>
+              <div className="inline-flex items-center gap-2 bg-[#CE1126]/5 border border-[#CE1126]/10 rounded-full px-4 py-1.5 mb-4">
+                <MapPin size={14} className="text-[#CE1126]" />
+                <span className="text-[#CE1126] text-xs font-semibold uppercase tracking-wider">Discover Ghana</span>
+              </div>
+              <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-6">
+                Why Visit <span className="text-[#006B3F]">Ghana</span>?
+              </h2>
+              <p className="text-gray-500 leading-relaxed mb-8">
+                Ghana — the Gateway to West Africa — is one of the most welcoming and vibrant countries on the continent. 
+                From pristine coastlines to lush rainforests, historic castles to bustling city nightlife, Ghana offers an 
+                unforgettable experience for every traveler.
+              </p>
+
+              <div className="space-y-4">
+                {[
+                  { icon: <Star size={18} />, title: "Rich Cultural Heritage", desc: "Experience centuries-old traditions, vibrant festivals, and the warmth of Ghanaian hospitality." },
+                  { icon: <Globe size={18} />, title: "Year of Return & Beyond", desc: "Trace your roots through heritage sites, forts, and the Door of No Return at Cape Coast." },
+                  { icon: <Shield size={18} />, title: "Safe & Stable", desc: "One of Africa's most peaceful and democratic nations with a strong rule of law." },
+                  { icon: <Plane size={18} />, title: "Easy Connectivity", desc: "Kotoka International Airport connects Ghana to major cities worldwide." },
+                ].map((feat) => (
+                  <div key={feat.title} className="flex items-start gap-4 group">
+                    <div className="w-10 h-10 bg-[#006B3F]/8 rounded-xl flex items-center justify-center shrink-0 text-[#006B3F] group-hover:bg-[#006B3F] group-hover:text-white transition-all">
+                      {feat.icon}
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-gray-900 text-sm">{feat.title}</h4>
+                      <p className="text-sm text-gray-500">{feat.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className={`relative ${whyGhana.inView ? "animate-slide-in-right2" : "opacity-0"}`}>
+              <div className="relative rounded-3xl overflow-hidden shadow-2xl aspect-[4/5]">
+                <iframe
+                  className="w-full h-full object-cover"
+                  src="https://www.youtube.com/embed/Mj6W3w1Eeys?autoplay=1&mute=1&loop=1&playlist=Mj6W3w1Eeys&controls=0&showinfo=0&modestbranding=1&iv_load_policy=3&rel=0"
+                  title="Ghana Tourism Video"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+                <div className="absolute bottom-0 left-0 right-0 p-8">
+                  <p className="text-white font-bold text-lg mb-1">Akwaaba!</p>
+                  <p className="text-white/70 text-sm">Welcome to Ghana — the land of gold and hospitality</p>
+                </div>
+              </div>
+              {/* Decorative elements */}
+              <div className="absolute -top-4 -right-4 w-24 h-24 bg-[#C8962E]/10 rounded-2xl -z-10" />
+              <div className="absolute -bottom-4 -left-4 w-32 h-32 bg-[#006B3F]/8 rounded-2xl -z-10" />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════════════ STATS ═══════════════════ */}
+      <section className="py-20 bg-gradient-to-r from-[#006B3F] via-[#007A47] to-[#006B3F] relative overflow-hidden" ref={stats.ref}>
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wMyI+PHBhdGggZD0iTTM2IDE4YzAtOS45NDEtOC4wNTktMTgtMTgtMThTMCA4LjA1OSAwIDE4czguMDU5IDE4IDE4IDE4IDE4LTguMDU5IDE4LTE4Ii8+PC9nPjwvZz48L3N2Zz4=')] opacity-50" />
+        <div className="max-w-7xl mx-auto px-5 lg:px-8 relative z-10">
+          <div className={`grid grid-cols-2 lg:grid-cols-4 gap-8 ${stats.inView ? "animate-fade-in" : "opacity-0"}`}>
+            {[
+              { value: "50,000+", label: "Visas Issued", icon: <FileText size={20} /> },
+              { value: "190+", label: "Countries Served", icon: <Globe size={20} /> },
+              { value: "98%", label: "Approval Rate", icon: <CheckCircle2 size={20} /> },
+              { value: "3 Days", label: "Avg. Processing", icon: <Clock size={20} /> },
+            ].map((stat, i) => (
+              <div key={stat.label} className={`text-center ${stats.inView ? `animate-count-up delay-${(i + 1) * 200}` : "opacity-0"}`}>
+                <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center mx-auto mb-4 text-white/70">
+                  {stat.icon}
+                </div>
+                <p className="text-3xl sm:text-4xl font-extrabold text-white mb-1">{stat.value}</p>
+                <p className="text-white/60 text-sm font-medium">{stat.label}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════════════ FAQ ═══════════════════ */}
+      <section id="faq" className="py-24 lg:py-32 bg-[#FAFBFC]" ref={faq.ref}>
+        <div className="max-w-3xl mx-auto px-5 lg:px-8">
+          <div className={`text-center mb-14 ${faq.inView ? "animate-slide-up" : "opacity-0"}`}>
+            <div className="inline-flex items-center gap-2 bg-[#2E6B96]/5 border border-[#2E6B96]/10 rounded-full px-4 py-1.5 mb-4">
+              <FileText size={14} className="text-[#2E6B96]" />
+              <span className="text-[#2E6B96] text-xs font-semibold uppercase tracking-wider">FAQ</span>
+            </div>
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-4">
+              Frequently Asked <span className="text-[#2E6B96]">Questions</span>
+            </h2>
+            <p className="text-gray-500">Everything you need to know about the Ghana e-Visa process.</p>
+          </div>
+
+          <div className={`space-y-3 ${faq.inView ? "animate-slide-up delay-200" : "opacity-0"}`}>
+            {faqs.map((item, i) => (
+              <div key={i} className="bg-white rounded-xl border border-gray-100 overflow-hidden hover:shadow-md transition-shadow">
+                <button
+                  onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                  className="w-full flex items-center justify-between px-6 py-4.5 text-left cursor-pointer"
+                >
+                  <span className="font-semibold text-gray-900 text-sm pr-4">{item.q}</span>
+                  <ChevronDown
+                    size={18}
+                    className={`text-gray-400 shrink-0 transition-transform duration-200 ${openFaq === i ? "rotate-180" : ""}`}
+                  />
+                </button>
+                {openFaq === i && (
+                  <div className="px-6 pb-4 text-sm text-gray-500 leading-relaxed animate-fade-in">
+                    {item.a}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════════════ CTA BANNER ═══════════════════ */}
+      <section className="py-20 bg-white">
+        <div className="max-w-4xl mx-auto px-5 lg:px-8 text-center">
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-4">
+            Ready to Visit <span className="text-[#006B3F]">Ghana</span>?
+          </h2>
+          <p className="text-gray-500 mb-8 max-w-lg mx-auto">
+            Start your e-Visa application today. The entire process is digital, secure, and takes just minutes to complete.
           </p>
+          <div className="flex flex-wrap items-center justify-center gap-4">
+            <Link
+              href="/register"
+              className="group inline-flex items-center gap-2.5 bg-[#006B3F] hover:bg-[#005A34] text-white font-bold px-8 py-4 rounded-xl shadow-xl shadow-[#006B3F]/20 transition-all text-sm sm:text-base"
+            >
+              Begin Your Application
+              <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+            </Link>
+            <Link
+              href="/requirements"
+              className="inline-flex items-center gap-2 border-2 border-gray-200 text-gray-700 hover:border-gray-300 hover:bg-gray-50 font-semibold px-7 py-4 rounded-xl transition-all text-sm sm:text-base"
+            >
+              View Requirements
+            </Link>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+      </section>
+
+      {/* ═══════════════════ FOOTER ═══════════════════ */}
+      <footer className="bg-gray-900 text-white pt-16 pb-8">
+        {/* Ghana flag accent strip */}
+        <div className="flex h-1 mb-12">
+          <div className="flex-1 bg-[#CE1126]" />
+          <div className="flex-1 bg-[#C8962E]" />
+          <div className="flex-1 bg-[#006B3F]" />
         </div>
-      </main>
+
+        <div className="max-w-7xl mx-auto px-5 lg:px-8">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
+            {/* Brand */}
+            <div>
+              <div className="flex items-center gap-3 mb-4">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src="/gis-logo.png" alt="Ghana" width={36} height={36} className="opacity-80" />
+                <div>
+                  <p className="font-bold text-sm">GH-eVISA</p>
+                  <p className="text-gray-500 text-[10px] uppercase tracking-widest">Republic of Ghana</p>
+                </div>
+              </div>
+              <p className="text-gray-400 text-sm leading-relaxed">
+                The official electronic visa application portal of the Ghana Immigration Service.
+              </p>
+            </div>
+
+            {/* Quick Links */}
+            <div>
+              <h4 className="font-bold text-sm mb-4 text-gray-300 uppercase tracking-wider">Quick Links</h4>
+              <ul className="space-y-2.5">
+                {["Apply for Visa|/register", "Check Requirements|/requirements", "Track Application|/track", "Sign In|/login"].map((item) => {
+                  const [label, href] = item.split("|");
+                  return (
+                    <li key={href}>
+                      <Link href={href} className="text-gray-400 hover:text-white text-sm transition-colors">
+                        {label}
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+
+            {/* Legal */}
+            <div>
+              <h4 className="font-bold text-sm mb-4 text-gray-300 uppercase tracking-wider">Legal</h4>
+              <ul className="space-y-2.5">
+                {["Privacy Policy|/privacy-policy", "Terms of Service|/terms", "Cookie Policy|/cookies", "Accessibility|/accessibility"].map((item, index) => {
+                  const [label, href] = item.split("|");
+                  return (
+                    <li key={`legal-${index}`}>
+                      <Link href={href} className="text-gray-400 hover:text-white text-sm transition-colors">
+                        {label}
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+
+            {/* Contact */}
+            <div>
+              <h4 className="font-bold text-sm mb-4 text-gray-300 uppercase tracking-wider">Contact</h4>
+              <ul className="space-y-3">
+                <li className="flex items-center gap-3">
+                  <Phone size={14} className="text-gray-500" />
+                  <span className="text-gray-400 text-sm">+233 (0) 302 258 250</span>
+                </li>
+                <li className="flex items-center gap-3">
+                  <Mail size={14} className="text-gray-500" />
+                  <span className="text-gray-400 text-sm">evisa@gis.gov.gh</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <MapPin size={14} className="text-gray-500 mt-0.5" />
+                  <span className="text-gray-400 text-sm">Ghana Immigration Service<br />Independence Ave, Accra</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="pt-8 border-t border-gray-800 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <p className="text-gray-500 text-xs">
+              © {new Date().getFullYear()} Ghana Immigration Service. All rights reserved.
+            </p>
+            <p className="text-gray-600 text-xs">
+              Powered by the Ministry of the Interior, Republic of Ghana
+            </p>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }

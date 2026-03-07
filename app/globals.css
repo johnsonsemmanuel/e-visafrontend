@@ -1,26 +1,326 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: "Manrope", var(--font-manrope), system-ui, -apple-system, sans-serif;
+  --font-manrope: "Manrope", var(--font-manrope), system-ui, -apple-system, sans-serif;
+
+  /* ── Ghana-inspired premium palette ────────────── */
+
+  /* Primary: Deep charcoal-navy — sophisticated, authoritative */
+  --color-primary: #1a1d23;
+  --color-primary-light: #2a2e36;
+  --color-primary-dark: #111318;
+
+  /* Accent: Refined Ghana green — dignified, not neon */
+  --color-accent: #006B3F;
+  --color-accent-light: #0D8050;
+  --color-accent-dark: #005A34;
+
+  /* Gold: Warm government gold — premium, authoritative */
+  --color-gold: #C8962E;
+  --color-gold-light: #D4A94B;
+  --color-gold-dark: #B08425;
+
+  /* Sidebar: Deep charcoal */
+  --color-sidebar: #1a1d23;
+  --color-sidebar-hover: #2a2e36;
+  --color-sidebar-active: #006B3F;
+
+  /* Surfaces: Clean bright whites */
+  --color-surface: #F7F8FA;
+  --color-card: #FFFFFF;
+  --color-border: #E5E7EB;
+  --color-border-light: #F1F3F5;
+
+  /* Typography: Clear contrast */
+  --color-text-primary: #111827;
+  --color-text-secondary: #4B5563;
+  --color-text-muted: #9CA3AF;
+
+  /* Highlights */
+  --color-highlight: #E8F5EE;
+  --color-highlight-foreground: #005A34;
+
+  /* Semantic — Ghana flag red for danger, gold for warning */
+  --color-success: #006B3F;
+  --color-warning: #C8962E;
+  --color-danger: #CE1126;
+  --color-info: #2E6B96;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+:root {
+  --branding-primary: #1a1d23;
+  --branding-accent: #006B3F;
+  --branding-gold: #C8962E;
+  --branding-red: #CE1126;
+}
+
+* {
+  border-color: var(--color-border);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+  font-family: var(--font-sans);
+}
+
+/* ── Component Utility Classes ───────────────── */
+
+.card {
+  background: #FFFFFF;
+  border-radius: 1rem;
+  border: 1px solid var(--color-border);
+  padding: 1.5rem;
+  box-shadow:
+    0 1px 3px 0 rgb(0 0 0 / 0.04),
+    0 2px 8px -2px rgb(0 0 0 / 0.06);
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+.card:hover {
+  box-shadow:
+    0 2px 6px 0 rgb(0 0 0 / 0.06),
+    0 6px 20px -4px rgb(0 0 0 / 0.08);
+}
+
+/* Premium card with subtle gold top accent */
+.card-accent {
+  background: #FFFFFF;
+  border-radius: 1rem;
+  border: 1px solid var(--color-border);
+  border-top: 2.5px solid var(--color-gold);
+  padding: 1.5rem;
+  box-shadow:
+    0 1px 3px 0 rgb(0 0 0 / 0.04),
+    0 2px 8px -2px rgb(0 0 0 / 0.06);
+  transition: box-shadow 0.2s ease;
+}
+.card-accent:hover {
+  box-shadow:
+    0 2px 6px 0 rgb(0 0 0 / 0.06),
+    0 6px 20px -4px rgb(0 0 0 / 0.08);
+}
+
+/* Interactive card — lifts on hover */
+.card-interactive {
+  background: #FFFFFF;
+  border-radius: 1rem;
+  border: 1px solid var(--color-border);
+  padding: 1.5rem;
+  box-shadow:
+    0 1px 3px 0 rgb(0 0 0 / 0.04),
+    0 2px 8px -2px rgb(0 0 0 / 0.06);
+  transition: all 0.15s ease;
+  cursor: pointer;
+}
+.card-interactive:hover {
+  border-color: rgb(0 107 63 / 0.25);
+  box-shadow:
+    0 4px 8px -1px rgb(0 0 0 / 0.06),
+    0 10px 28px -6px rgb(0 0 0 / 0.1);
+  transform: translateY(-2px);
+}
+
+/* Info field — for detail pages */
+.info-field {
+  padding: 0.875rem 1rem;
+  background: var(--color-surface);
+  border-radius: 0.625rem;
+  border: 1px solid rgb(0 0 0 / 0.03);
+}
+.info-field .info-label {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.25rem;
+}
+.info-field .info-value {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.input {
+  width: 100%;
+  padding: 0.625rem 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+  outline: none;
+  transition: all 0.2s;
+  font-size: 0.875rem;
+  background: white;
+}
+.input:focus {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px rgb(0 107 63 / 0.12);
+}
+.input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--color-text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.625rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+.badge-success { background: rgb(0 107 63 / 0.08); color: #006B3F; }
+.badge-warning { background: rgb(200 150 46 / 0.1); color: #B08425; }
+.badge-danger  { background: rgb(206 17 38 / 0.08);  color: #CE1126; }
+.badge-info    { background: rgb(46 107 150 / 0.08);  color: #2E6B96; }
+.badge-neutral { background: rgb(92 95 102 / 0.08); color: #5C5F66; }
+
+/* ── Homepage Animations ─────────────────────── */
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to   { opacity: 1; transform: scale(1); }
+}
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(16px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-8px); }
+}
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.animate-fade-in-up  { animation: fadeInUp 0.3s ease-out both; }
+.animate-fade-in     { animation: fadeIn 0.2s ease-out both; }
+.animate-scale-in    { animation: scaleIn 0.25s ease-out both; }
+.animate-slide-right { animation: slideInRight 0.3s ease-out both; }
+.animate-float       { animation: float 4s ease-in-out infinite; }
+
+.delay-100 { animation-delay: 30ms; }
+.delay-200 { animation-delay: 60ms; }
+.delay-300 { animation-delay: 90ms; }
+.delay-400 { animation-delay: 120ms; }
+.delay-500 { animation-delay: 150ms; }
+.delay-600 { animation-delay: 180ms; }
+.delay-700 { animation-delay: 210ms; }
+.delay-800 { animation-delay: 240ms; }
+
+/* Glass morphism card */
+.glass {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+/* ── Homepage-specific animations ────────────── */
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(40px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-40px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes slideInRight2 {
+  from { opacity: 0; transform: translateX(40px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes pulseGlow {
+  0%, 100% { box-shadow: 0 0 0 0 rgb(0 107 63 / 0.3); }
+  50%      { box-shadow: 0 0 0 12px rgb(0 107 63 / 0); }
+}
+@keyframes countUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes gradientShift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+@keyframes typewriter {
+  from { width: 0; }
+  to   { width: 100%; }
+}
+@keyframes blink {
+  0%, 50% { border-color: transparent; }
+  51%, 100% { border-color: var(--color-gold); }
+}
+@keyframes ripple {
+  0%   { transform: scale(1); opacity: 0.4; }
+  100% { transform: scale(2.5); opacity: 0; }
+}
+@keyframes marquee {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.animate-slide-up      { animation: slideUp 0.7s ease-out both; }
+.animate-slide-down    { animation: slideDown 0.5s ease-out both; }
+.animate-slide-in-left { animation: slideInLeft 0.7s ease-out both; }
+.animate-slide-in-right2 { animation: slideInRight2 0.7s ease-out both; }
+.animate-pulse-glow    { animation: pulseGlow 2s ease-in-out infinite; }
+.animate-count-up      { animation: countUp 0.5s ease-out both; }
+.animate-gradient      { animation: gradientShift 6s ease infinite; background-size: 200% 200%; }
+.animate-marquee       { animation: marquee 30s linear infinite; }
+
+.delay-500  { animation-delay: 150ms; }
+.delay-600  { animation-delay: 180ms; }
+.delay-700  { animation-delay: 210ms; }
+.delay-800  { animation-delay: 240ms; }
+.delay-900  { animation-delay: 270ms; }
+.delay-1000 { animation-delay: 300ms; }
+.delay-1200 { animation-delay: 400ms; }
+.delay-1500 { animation-delay: 500ms; }
+
+/* Gold accent for government feel */
+.gold-accent {
+  color: var(--color-gold);
+}
+.gold-bg {
+  background: linear-gradient(135deg, var(--color-gold) 0%, var(--color-gold-dark) 100%);
+}
+
+/* Video overlay gradient */
+.hero-overlay {
+  background: linear-gradient(
+    180deg,
+    rgba(26, 29, 35, 0.70) 0%,
+    rgba(26, 29, 35, 0.82) 40%,
+    rgba(26, 29, 35, 0.94) 100%
+  );
+}
+
+/* Decorative divider — gold to green gradient */
+.divider-gold {
+  height: 3px;
+  width: 60px;
+  background: linear-gradient(90deg, var(--color-gold), var(--color-accent));
+  border-radius: 2px;
 }

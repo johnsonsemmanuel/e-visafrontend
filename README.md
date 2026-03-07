@@ -1,36 +1,117 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Ghana eVisa Portal - Frontend
 
-## Getting Started
+A modern Next.js application for Ghana's electronic visa application system.
 
-First, run the development server:
+## 🚀 **Vercel Deployment Guide**
 
+### **Step 1: Prepare Your Repository**
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+# Ensure all changes are committed
+git add .
+git commit -m "Ready for Vercel deployment"
+git push origin main
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### **Step 2: Deploy to Vercel**
+1. Go to [Vercel Dashboard](https://vercel.com/dashboard)
+2. Click **"Add New..."** → **"Project"**
+3. Import your GitHub repository
+4. Vercel will auto-detect Next.js and configure settings
+5. Click **"Deploy"**
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### **Step 3: Configuration (Already Done)**
+✅ **vercel.json** - Optimized for Next.js  
+✅ **next.config.js** - Production ready  
+✅ **package.json** - Build scripts configured  
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### **Step 4: Custom Domain (Optional)**
+1. In Vercel Dashboard → Project Settings → Domains
+2. Add your custom domain
+3. Update DNS records as instructed
 
-## Learn More
+## 🛠️ **Local Development**
 
-To learn more about Next.js, take a look at the following resources:
+### **Prerequisites**
+- Node.js 18+ 
+- npm or yarn
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### **Setup**
+```bash
+# Install dependencies
+npm install
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+# Run development server
+npm run dev
 
-## Deploy on Vercel
+# Open http://localhost:3000
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### **Build for Production**
+```bash
+# Build the application
+npm run build
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+# Start production server
+npm start
+```
+
+## 📁 **Project Structure**
+
+```
+frontend/
+├── app/                    # Next.js app router
+│   ├── page.tsx           # Homepage
+│   ├── dashboard/         # Dashboard pages
+│   ├── login/             # Authentication
+│   └── verify/            # Visa verification
+├── components/            # Reusable UI components
+├── lib/                  # Utilities and types
+├── public/               # Static assets
+├── vercel.json          # Vercel configuration
+└── next.config.js       # Next.js configuration
+```
+
+## 🎯 **Features**
+
+- **Homepage**: Landing page with visa information
+- **Dashboard**: Multi-role dashboard (Applicant, GIS, MFA, Admin)
+- **Application Form**: Complete visa application flow
+- **Payment Integration**: Multiple payment methods
+- **Document Upload**: File management system
+- **Real-time Updates**: Live status tracking
+
+## 🔧 **Environment Variables**
+
+Create `.env.local` for local development:
+```env
+NEXT_PUBLIC_API_URL=http://localhost:8000/api
+```
+
+## 📦 **Deployment Notes**
+
+- **Framework**: Next.js 16 with App Router
+- **Rendering**: Server-Side Rendering (SSR)
+- **Build**: Optimized production build
+- **Performance**: Edge caching enabled
+- **Security**: Security headers configured
+
+## 🌐 **Vercel Features Used**
+
+- ✅ Automatic deployments from GitHub
+- ✅ Preview environments for pull requests
+- ✅ Edge caching globally
+- ✅ Custom domain support
+- ✅ SSL certificates
+- ✅ Analytics and performance monitoring
+
+## 📞 **Support**
+
+For deployment issues:
+1. Check Vercel deployment logs
+2. Verify environment variables
+3. Ensure all dependencies are installed
+4. Check build output for errors
+
+---
+
+**🎉 Your Ghana eVisa Portal is ready for Vercel deployment!**
