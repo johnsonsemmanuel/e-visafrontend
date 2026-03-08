@@ -35,7 +35,7 @@ const tierIcons: Record<string, React.ReactNode> = {
 };
 
 function DynField({ field, value, onChange, error }: { field: VisaFormField; value: string; onChange: (v: string) => void; error?: string }) {
-  const isCty = ["nationality","passport_issue_country","final_destination"].includes(field.key);
+  const isCty = ["nationality", "passport_issue_country", "final_destination"].includes(field.key);
   const isNationality = field.key === "nationality";
   if (field.type === "select") return (
     <div className={field.fullWidth ? "sm:col-span-2" : ""}>
@@ -142,18 +142,18 @@ function NewApplicationPageInner() {
 
   // Fetch pricing from server-side API
   const [fees, setFees] = useState({ base: 0, entry: 0, processing: 0, total: 0, entryMultiplier: 1, tierMultiplier: 1 });
-  
+
   useEffect(() => {
     const fetchPricing = async () => {
       if (!form.visa_channel || !form.entry_type || !selST?.code) return;
-      
+
       try {
         const response = await api.post('/pricing/calculate', {
           visa_channel: form.visa_channel,
           entry_type: form.entry_type,
           service_tier_code: selST.code,
         });
-        
+
         if (response.data.success) {
           const pricing = response.data.pricing;
           setFees({
@@ -171,7 +171,7 @@ function NewApplicationPageInner() {
         setFees({ base: 0, entry: 0, processing: 0, total: 0, entryMultiplier: 1, tierMultiplier: 1 });
       }
     };
-    
+
     fetchPricing();
   }, [form.visa_channel, form.entry_type, selST?.code]);
 
@@ -346,16 +346,16 @@ function NewApplicationPageInner() {
     try {
       // DEMO MODE: Use simulated payment for demo purposes
       const res = await api.post(`/applicant/payment/simulate`, { application_id: application.id });
-      
+
       if (res.data.success) {
         clearDraft();
         setShowPaymentModal(false);
-        
+
         toast.success(
           `${res.data.message}\n\n⚠️ ${res.data.demo_note}`,
           { duration: 3000, icon: "✅" }
         );
-        
+
         // Show completion popup instead of immediate redirect
         setTimeout(() => {
           setShowCompletionPopup(true);
@@ -445,7 +445,7 @@ function NewApplicationPageInner() {
   const prevStep = () => setCurrentStep((p) => Math.max(p - 1, 0));
 
   const countryName = (code: string) => countries.find((c) => c.code === code)?.name || code;
-  const optLabel = (options: {value:string;label:string}[] | undefined, val: string) => options?.find(o => o.value === val)?.label || val;
+  const optLabel = (options: { value: string; label: string }[] | undefined, val: string) => options?.find(o => o.value === val)?.label || val;
 
   return (
     <DashboardShell title="New Visa Application" description="Complete each section to submit your application">
@@ -458,7 +458,7 @@ function NewApplicationPageInner() {
                 <div className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-semibold transition-all duration-200 ease-out
                   ${i < currentStep ? "bg-accent text-white shadow-sm ring-4 ring-accent/15"
                     : i === currentStep ? "bg-primary text-white shadow-sm ring-4 ring-primary/15"
-                    : "bg-surface text-text-muted border border-border"}`}>
+                      : "bg-surface text-text-muted border border-border"}`}>
                   {i < currentStep ? <Check size={14} strokeWidth={3} /> : i + 1}
                 </div>
                 <span className={`text-[10px] hidden lg:block leading-tight text-center max-w-[72px]
@@ -491,7 +491,7 @@ function NewApplicationPageInner() {
                 </p>
               </div>
             </div>
-            
+
             <div className="grid grid-cols-3 gap-4 pt-4 border-t border-accent/20">
               <div className="text-center">
                 <p className="text-xs text-text-muted uppercase tracking-wider font-medium">Base Fee</p>
@@ -556,24 +556,24 @@ function NewApplicationPageInner() {
                     <div className="text-right">
                       <p className="text-xs text-text-muted uppercase tracking-wider font-medium">Entry Fee</p>
                       <p className="text-lg font-bold text-text-primary">
-                        {form.entry_type === "multiple" ? "+$208.00" : form.entry_type === "single" ? "+$0.00" : "---"}
+                        {form.entry_type === "multiple" ? `+$${(260 * 0.8).toFixed(2)}` : form.entry_type === "single" ? "+$0.00" : "---"}
                       </p>
                       <p className="text-xs text-text-muted mt-0.5">
                         {form.entry_type ? (form.entry_type === "multiple" ? "Multiple Entry" : "Single Entry") : "Required"}
                       </p>
                     </div>
                   </div>
-                  
+
                   {form.entry_type && (
                     <div className="pt-3 border-t border-accent/20">
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="text-xs text-text-muted uppercase tracking-wider font-medium">Total Amount</p>
                           <p className="text-2xl font-bold text-accent">
-                            {form.entry_type === "multiple" ? "$468.00" : "$260.00"}
+                            {form.entry_type === "multiple" ? `$${(260 * 1.8).toFixed(2)}` : "$260.00"}
                           </p>
                           <p className="text-xs text-text-muted mt-0.5">
-                            {form.entry_type === "multiple" ? "$260 + $208" : "$260 + $0"}
+                            {form.entry_type === "multiple" ? `$260 × 1.8 = $${(260 * 1.8).toFixed(2)}` : "$260 × 1.0 = $260.00"}
                           </p>
                         </div>
                         <div className="text-right">
@@ -1037,8 +1037,8 @@ function NewApplicationPageInner() {
                 <div>
                   <p className="text-sm font-medium text-text-primary mb-1">Important Health Information</p>
                   <p className="text-xs text-text-muted">
-                    Ghana requires all travelers to present a valid Yellow Fever vaccination certificate upon arrival. 
-                    Travelers may also be subject to health screening at the port of entry. Please ensure you have 
+                    Ghana requires all travelers to present a valid Yellow Fever vaccination certificate upon arrival.
+                    Travelers may also be subject to health screening at the port of entry. Please ensure you have
                     adequate travel health insurance covering medical expenses during your stay.
                   </p>
                 </div>
@@ -1236,14 +1236,12 @@ function NewApplicationPageInner() {
 
       {/* ── Modals ── */}
       <EntryTypeModal open={showEntryTypeModal} onClose={handleEntryTypeConfirm} onSelect={handleEntryTypeSelect}
-        selected={form.entry_type as "single" | "multiple" | ""} baseFee={parseFloat(selVT?.base_fee || "0")}
-        multipleEntryFee={parseFloat(selVT?.multiple_entry_fee || "0")} visaTypeName={selVT?.name || ""} />
+        selected={form.entry_type as "single" | "multiple" | ""} baseFee={260}
+        multipleEntryFee={260 * 0.8} visaTypeName={selVT?.name || ""} />
 
       <ProcessingSpeedModal open={showSpeedModal} onClose={() => setShowSpeedModal(false)}
         onSelect={(id) => set("service_tier_id", id)} serviceTiers={serviceTiers} selectedTierId={form.service_tier_id}
-        baseFee={form.entry_type === "multiple" && selVT?.multiple_entry_fee 
-          ? parseFloat(selVT.multiple_entry_fee) 
-          : parseFloat(selVT?.base_fee || "0")} 
+        baseFee={form.entry_type === "multiple" ? 260 * 1.8 : 260}
         visaTypeName={selVT?.name || ""} />
 
       <PaymentModal open={showPaymentModal} onClose={() => setShowPaymentModal(false)} onPay={handlePay}
@@ -1264,7 +1262,7 @@ function NewApplicationPageInner() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           {/* Backdrop */}
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowCompletionPopup(false)} />
-          
+
           {/* Modal */}
           <div className="relative bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 animate-scale-in">
             {/* Close Button */}
@@ -1289,7 +1287,7 @@ function NewApplicationPageInner() {
 
               {/* Message */}
               <p className="text-sm text-text-secondary mb-6 leading-relaxed">
-                Congratulations! Your visa application has been submitted and is now under review. 
+                Congratulations! Your visa application has been submitted and is now under review.
                 You can track the status of your application and view all details in your dashboard.
               </p>
 
@@ -1301,7 +1299,7 @@ function NewApplicationPageInner() {
 
               {/* Action Buttons */}
               <div className="flex flex-col sm:flex-row gap-3">
-                <Button 
+                <Button
                   onClick={() => {
                     router.push(`/dashboard/applicant/applications/${application.id}`);
                     setShowCompletionPopup(false);
@@ -1310,7 +1308,7 @@ function NewApplicationPageInner() {
                 >
                   View Application Details
                 </Button>
-                <Button 
+                <Button
                   onClick={() => {
                     router.push("/dashboard/applicant");
                     setShowCompletionPopup(false);
