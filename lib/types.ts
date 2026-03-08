@@ -1,18 +1,18 @@
 /* ── User & Auth ─────────────────────────────── */
 
-export type UserRole = 
-  | "applicant" 
+export type UserRole =
+  | "applicant"
   | "APPLICANT"
-  | "GIS_REVIEWING_OFFICER" 
-  | "GIS_APPROVAL_OFFICER" 
+  | "GIS_REVIEWING_OFFICER"
+  | "GIS_APPROVAL_OFFICER"
   | "GIS_ADMIN"
-  | "MFA_REVIEWING_OFFICER" 
-  | "MFA_APPROVAL_OFFICER" 
+  | "MFA_REVIEWING_OFFICER"
+  | "MFA_APPROVAL_OFFICER"
   | "MFA_ADMIN"
   | "SYSTEM_ADMIN"
   // Legacy role names for backward compatibility
-  | "gis_officer" 
-  | "mfa_reviewer" 
+  | "gis_officer"
+  | "mfa_reviewer"
   | "admin";
 export type Agency = "GIS" | "MFA" | "ADMIN";
 
@@ -116,14 +116,34 @@ export interface Application {
   first_name: string;
   last_name: string;
   date_of_birth: string;
+  gender: string | null;
+  marital_status: string | null;
+  profession: string | null;
+  country_of_birth: string | null;
   passport_number: string;
+  passport_issue_date: string | null;
+  passport_expiry: string | null;
   nationality: string;
   email: string;
   phone: string | null;
   intended_arrival: string | null;
   duration_days: number | null;
+  visa_duration: number | null;
+  port_of_entry: string | null;
   address_in_ghana: string | null;
   purpose_of_visit: string | null;
+  visited_country_1: string | null;
+  visited_country_2: string | null;
+  visited_country_3: string | null;
+  // Health & Security Declarations
+  health_declaration_fever: boolean | null;
+  health_declaration_cough: boolean | null;
+  health_declaration_breathing: boolean | null;
+  health_declaration_ebola: boolean | null;
+  health_declaration_yellow_fever: boolean | null;
+  security_declaration_convicted: boolean | null;
+  security_declaration_deported: boolean | null;
+  security_declaration_terrorist: boolean | null;
   status: ApplicationStatus;
   tier: Tier | null;
   processing_tier: ProcessingTier | null;
@@ -131,6 +151,17 @@ export interface Application {
   risk_screening_status: "pending" | "in_progress" | "cleared" | "flagged" | null;
   risk_score: number | null;
   risk_level: "low" | "medium" | "high" | "critical" | null;
+  riskAssessment?: {
+    risk_score: number;
+    risk_level: "low" | "medium" | "high" | "critical";
+    factors: Array<{
+      name: string;
+      triggered: boolean;
+      score: number;
+      details?: string;
+    }>;
+    watchlist_match: boolean;
+  };
   watchlist_flagged: boolean;
   assigned_officer_id: number | null;
   current_queue: "review_queue" | "approval_queue" | null;

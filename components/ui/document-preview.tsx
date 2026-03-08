@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { X, Download, ZoomIn, ZoomOut, RotateCw, FileText, Image as ImageIcon } from "lucide-react";
 import { Button } from "./button";
+import api from "@/lib/api";
 
 interface DocumentPreviewProps {
   isOpen: boolean;
@@ -14,18 +15,44 @@ interface DocumentPreviewProps {
     stored_path: string;
     mime_type: string;
   } | null;
-  baseUrl?: string;
+  downloadUrl: string;
 }
 
-export function DocumentPreview({ isOpen, onClose, document, baseUrl = "" }: DocumentPreviewProps) {
+export function DocumentPreview({ isOpen, onClose, document, downloadUrl }: DocumentPreviewProps) {
   const [zoom, setZoom] = useState(1);
   const [rotation, setRotation] = useState(0);
+  const [objectUrl, setObjectUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!isOpen || !downloadUrl) return;
+
+    if (downloadUrl.startsWith('/api') || !downloadUrl.startsWith('blob:')) {
+      const fetchImage = async () => {
+        try {
+          const response = await api.get(downloadUrl, { responseType: 'blob' });
+          const url = URL.createObjectURL(response.data);
+          setObjectUrl(url);
+        } catch (error) {
+          console.error('Failed to load document preview:', error);
+        }
+      };
+      fetchImage();
+    } else {
+      setObjectUrl(downloadUrl);
+    }
+
+    return () => {
+      if (objectUrl && !objectUrl.startsWith('data:')) {
+        URL.revokeObjectURL(objectUrl);
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, downloadUrl]);
 
   if (!isOpen || !document) return null;
 
   const isImage = document.mime_type?.startsWith("image/");
   const isPdf = document.mime_type === "application/pdf";
-  const previewUrl = `${baseUrl}/storage/${document.stored_path}`;
 
   const handleZoomIn = () => setZoom((z) => Math.min(z + 0.25, 3));
   const handleZoomOut = () => setZoom((z) => Math.max(z - 0.25, 0.5));
@@ -82,8 +109,9 @@ export function DocumentPreview({ isOpen, onClose, document, baseUrl = "" }: Doc
               </>
             )}
             <a
-              href={previewUrl}
-              download={document.original_filename}
+              href={downloadUrl}
+              target="_blank"
+              rel="noopener noreferrer"
               className="p-2 rounded-lg hover:bg-surface transition-colors"
               title="Download"
             >
@@ -108,26 +136,38 @@ export function DocumentPreview({ isOpen, onClose, document, baseUrl = "" }: Doc
                 transform: `scale(${zoom}) rotate(${rotation}deg)`,
               }}
             >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={previewUrl}
-                alt={document.document_type}
-                className="max-w-full max-h-[60vh] object-contain rounded-lg shadow-lg"
-              />
+              {objectUrl ? (
+                /* eslint-disable-next-line @next/next/no-img-element */
+                <img
+                  src={objectUrl}
+                  alt={document.document_type}
+                  className="max-w-full max-h-[60vh] object-contain rounded-lg shadow-lg"
+                />
+              ) : (
+                <div className="w-64 h-64 flex items-center justify-center border border-border rounded-lg bg-surface">
+                  <p className="text-text-muted text-sm tracking-wider uppercase font-medium">Loading...</p>
+                </div>
+              )}
             </div>
           ) : isPdf ? (
-            <iframe
-              src={previewUrl}
-              className="w-full h-[60vh] rounded-lg border border-border"
-              title={document.document_type}
-            />
+            objectUrl ? (
+              <iframe
+                src={objectUrl}
+                className="w-full h-[60vh] rounded-lg border border-border"
+                title={document.document_type}
+              />
+            ) : (
+              <div className="w-full h-[60vh] flex items-center justify-center border border-border rounded-lg bg-surface">
+                <p className="text-text-muted text-sm tracking-wider uppercase font-medium">Loading PDF...</p>
+              </div>
+            )
           ) : (
             <div className="text-center py-12">
               <FileText size={48} className="mx-auto text-text-muted mb-4" />
               <p className="text-text-secondary mb-4">
                 Preview not available for this file type
               </p>
-              <a href={previewUrl} download={document.original_filename}>
+              <a href={downloadUrl} download={document.original_filename} target="_blank" rel="noopener noreferrer">
                 <Button leftIcon={<Download size={16} />}>Download File</Button>
               </a>
             </div>

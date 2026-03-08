@@ -76,7 +76,7 @@ export default function GisCaseDetailPage() {
   useEffect(() => {
     api.get<{ reason_codes: ReasonCode[] }>("/gis/reason-codes")
       .then((r) => setReasonCodes(r.data.reason_codes || []))
-      .catch(() => {});
+      .catch(() => { });
   }, []);
 
   const application = data?.application;
@@ -180,9 +180,9 @@ export default function GisCaseDetailPage() {
           <div className="flex-1" />
           {/* Reviewers: Submit for Approval | Approvers: Approve & Deny */}
           {!canApprove && (
-            <Button 
-              size="sm" 
-              leftIcon={<Send size={14} />} 
+            <Button
+              size="sm"
+              leftIcon={<Send size={14} />}
               className="!bg-info hover:!bg-info/90"
               onClick={async () => {
                 setLoading(true);
@@ -226,7 +226,7 @@ export default function GisCaseDetailPage() {
             </h3>
           </div>
           <p className="text-sm text-text-secondary mb-4">
-            {canApprove 
+            {canApprove
               ? "This application has been reviewed and is ready for your final approval decision."
               : "This application has been reviewed and is waiting for final approval from a supervisor."
             }
@@ -339,19 +339,23 @@ export default function GisCaseDetailPage() {
               </div>
               <StatusBadge status={application.status} />
             </div>
-            
+
             <div className="grid sm:grid-cols-3 gap-4 text-sm border-t border-border pt-4">
               <div>
                 <p className="text-text-muted mb-0.5">Gender</p>
-                <p className="text-text-primary font-medium">—</p>
+                <p className="text-text-primary font-medium capitalize">{application.gender || "—"}</p>
               </div>
               <div>
                 <p className="text-text-muted mb-0.5">Date of Birth</p>
                 <p className="text-text-primary font-medium">{application.date_of_birth || "—"}</p>
               </div>
               <div>
+                <p className="text-text-muted mb-0.5">Marital Status</p>
+                <p className="text-text-primary font-medium capitalize">{application.marital_status || "—"}</p>
+              </div>
+              <div>
                 <p className="text-text-muted mb-0.5">Occupation</p>
-                <p className="text-text-primary font-medium">—</p>
+                <p className="text-text-primary font-medium">{application.profession || "—"}</p>
               </div>
               <div>
                 <p className="text-text-muted mb-0.5">Nationality</p>
@@ -362,8 +366,16 @@ export default function GisCaseDetailPage() {
                 <p className="text-text-primary font-medium font-mono">{application.passport_number}</p>
               </div>
               <div>
+                <p className="text-text-muted mb-0.5">Passport Issue Date</p>
+                <p className="text-text-primary font-medium">{application.passport_issue_date || "—"}</p>
+              </div>
+              <div>
+                <p className="text-text-muted mb-0.5">Passport Expiry Date</p>
+                <p className="text-text-primary font-medium">{application.passport_expiry || "—"}</p>
+              </div>
+              <div>
                 <p className="text-text-muted mb-0.5">Place of Birth</p>
-                <p className="text-text-primary font-medium">—</p>
+                <p className="text-text-primary font-medium">{application.country_of_birth || "—"}</p>
               </div>
             </div>
           </div>
@@ -375,27 +387,21 @@ export default function GisCaseDetailPage() {
               <h2 className="text-lg font-semibold text-text-primary">Risk Intelligence</h2>
             </div>
             <RiskPanel
-              riskScore={application.risk_score ?? null}
-              riskLevel={application.risk_level as "low" | "medium" | "high" | "critical" | null}
-              watchlistFlagged={application.watchlist_flagged ?? false}
-              factors={[
-                { name: "watchlist_match", triggered: application.watchlist_flagged ?? false, score: 35 },
-                { name: "previous_denial", triggered: false, score: 25 },
-                { name: "overstay_history", triggered: false, score: 22 },
-                { name: "document_anomaly", triggered: false, score: 15 },
-                { name: "nationality_risk", triggered: false, score: 12 },
-              ]}
+              riskScore={application.riskAssessment?.risk_score ?? application.risk_score ?? null}
+              riskLevel={(application.riskAssessment?.risk_level ?? application.risk_level) as "low" | "medium" | "high" | "critical" | null}
+              watchlistFlagged={application.riskAssessment?.watchlist_match ?? application.watchlist_flagged ?? false}
+              factors={application.riskAssessment?.factors ?? []}
               recommendations={
                 application.risk_level === "high" || application.risk_level === "critical"
                   ? [
-                      { priority: "high", action: "MANUAL_REVIEW_REQUIRED", reason: "High risk score detected" },
-                      { priority: "medium", action: "VERIFY_DOCUMENTS", reason: "Additional document verification recommended" },
-                    ]
+                    { priority: "high", action: "MANUAL_REVIEW_REQUIRED", reason: "High risk score detected" },
+                    { priority: "medium", action: "VERIFY_DOCUMENTS", reason: "Additional document verification recommended" },
+                  ]
                   : application.risk_level === "medium"
-                  ? [
+                    ? [
                       { priority: "medium", action: "ENHANCED_SCREENING", reason: "Medium risk - enhanced screening advised" },
                     ]
-                  : [
+                    : [
                       { priority: "info", action: "APPROVE_RECOMMENDED", reason: "Low risk profile - standard processing" },
                     ]
               }
@@ -418,6 +424,10 @@ export default function GisCaseDetailPage() {
               <div>
                 <p className="text-text-muted mb-0.5">Duration</p>
                 <p className="text-text-primary font-medium">{application.duration_days ? `${application.duration_days} days` : "—"}</p>
+              </div>
+              <div>
+                <p className="text-text-muted mb-0.5">Port of Entry</p>
+                <p className="text-text-primary font-medium">{application.port_of_entry || "—"}</p>
               </div>
               <div className="sm:col-span-2">
                 <p className="text-text-muted mb-0.5">Address in Ghana</p>
@@ -542,25 +552,24 @@ export default function GisCaseDetailPage() {
                         {application.payment.payment_provider}
                       </td>
                       <td className="py-3 px-3">
-                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${
-                          application.payment.status === "completed" 
-                            ? "bg-success/10 text-success" 
-                            : application.payment.status === "failed"
+                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${application.payment.status === "completed"
+                          ? "bg-success/10 text-success"
+                          : application.payment.status === "failed"
                             ? "bg-danger/10 text-danger"
                             : "bg-warning/10 text-warning"
-                        }`}>
+                          }`}>
                           <CheckCircle2 size={12} />
                           {application.payment.status}
                         </span>
                       </td>
                       <td className="py-3 px-3 text-text-secondary">
-                        {application.payment.paid_at 
+                        {application.payment.paid_at
                           ? new Date(application.payment.paid_at).toLocaleDateString('en-US', {
-                              weekday: 'long',
-                              day: '2-digit',
-                              month: 'short',
-                              year: 'numeric'
-                            })
+                            weekday: 'long',
+                            day: '2-digit',
+                            month: 'short',
+                            year: 'numeric'
+                          })
                           : "—"}
                       </td>
                     </tr>
@@ -654,7 +663,7 @@ export default function GisCaseDetailPage() {
         </div>
         <div className="flex gap-3 justify-end mt-6">
           <Button variant="secondary" onClick={() => { setRequestInfoOpen(false); setSelectedReasonCode(null); }}>Cancel</Button>
-          <Button 
+          <Button
             className="!bg-blue-600 hover:!bg-blue-700"
             loading={loading}
             disabled={!selectedReasonCode}
@@ -665,9 +674,9 @@ export default function GisCaseDetailPage() {
               }
               setLoading(true);
               try {
-                await api.post(`/gis/cases/${id}/request-info`, { 
+                await api.post(`/gis/cases/${id}/request-info`, {
                   message: text,
-                  reason_code: selectedReasonCode 
+                  reason_code: selectedReasonCode
                 });
                 toast.success("Information request sent successfully");
                 setRequestInfoOpen(false);
@@ -701,13 +710,13 @@ export default function GisCaseDetailPage() {
         </div>
         <div className="flex gap-3 justify-end mt-6">
           <Button variant="secondary" onClick={() => { setApproveOpen(false); }}>Cancel</Button>
-          <Button 
-            className="!bg-emerald-600 hover:!bg-emerald-700" 
+          <Button
+            className="!bg-emerald-600 hover:!bg-emerald-700"
             loading={loading}
             onClick={async () => {
               setLoading(true);
               try {
-                await api.post(`/gis/cases/${id}/approve`, { 
+                await api.post(`/gis/cases/${id}/approve`, {
                   notes: text
                 });
                 toast.success("Application approved successfully");
@@ -747,8 +756,8 @@ export default function GisCaseDetailPage() {
         </div>
         <div className="flex gap-3 justify-end mt-6">
           <Button variant="secondary" onClick={() => { setDenyOpen(false); setSelectedReasonCode(null); }}>Cancel</Button>
-          <Button 
-            variant="danger" 
+          <Button
+            variant="danger"
             loading={loading}
             disabled={!selectedReasonCode || !text.trim()}
             onClick={async () => {
@@ -762,9 +771,9 @@ export default function GisCaseDetailPage() {
               }
               setLoading(true);
               try {
-                await api.post(`/gis/cases/${id}/deny`, { 
+                await api.post(`/gis/cases/${id}/deny`, {
                   notes: text,
-                  reason_code: selectedReasonCode 
+                  reason_code: selectedReasonCode
                 });
                 toast.success("Application denied successfully");
                 setDenyOpen(false);
@@ -791,7 +800,7 @@ export default function GisCaseDetailPage() {
         isOpen={!!previewDoc}
         onClose={() => setPreviewDoc(null)}
         document={previewDoc}
-        baseUrl={process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:8000'}
+        downloadUrl={previewDoc ? `${process.env.NEXT_PUBLIC_API_URL}/gis/cases/${id}/documents/${previewDoc.id}/download` : ""}
       />
     </DashboardShell>
   );

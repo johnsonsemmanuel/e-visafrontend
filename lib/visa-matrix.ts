@@ -66,9 +66,9 @@ export const DESTINATION_CITIES = [
   { value: "winneba", label: "Winneba" },
 ];
 
-export const ECOWAS_CODES = ["NG","SN","CI","ML","BF","NE","BJ","TG","GN","SL","LR","GM","GW","CV"];
-export const AU_CODES = [...ECOWAS_CODES,"KE","TZ","RW","UG","ET","DJ","SO","SS","SD","ER","ZA","NA","BW","ZW","ZM","MW","MZ","AO","SZ","LS","MA","TN","DZ","EG","LY","GA","CM","CG","CD","CF","TD","GQ","ST"];
-export const CARIBBEAN_CODES = ["BB","BS","GD","JM","TT","AG","DM","KN","LC","VC"];
+export const ECOWAS_CODES = ["NG", "SN", "CI", "ML", "BF", "NE", "BJ", "TG", "GN", "SL", "LR", "GM", "GW", "CV"];
+export const AU_CODES = [...ECOWAS_CODES, "KE", "TZ", "RW", "UG", "ET", "DJ", "SO", "SS", "SD", "ER", "ZA", "NA", "BW", "ZW", "ZM", "MW", "MZ", "AO", "SZ", "LS", "MA", "TN", "DZ", "EG", "LY", "GA", "CM", "CG", "CD", "CF", "TD", "GQ", "ST"];
+export const CARIBBEAN_CODES = ["BB", "BS", "GD", "JM", "TT", "AG", "DM", "KN", "LC", "VC"];
 export function isEcowas(c: string) { return ECOWAS_CODES.includes(c); }
 export function isAU(c: string) { return AU_CODES.includes(c); }
 
@@ -225,12 +225,19 @@ export const VISA_CONFIGS: Record<string, VisaTypeConfig> = {
       { key: "port_of_entry", label: "Port of Entry", type: "select", required: true, options: PORTS_OF_ENTRY },
       { key: "destination_city", label: "Destination City in Ghana", type: "select", required: true, options: DESTINATION_CITIES },
       { key: "residential_address", label: "Residential Address During Stay", type: "text", placeholder: "Hotel or host address", required: true, fullWidth: true },
-      { key: "visited_ghana_before", label: "Have you visited Ghana before?", type: "select", required: true, options: [
-        { value: "no", label: "No" },{ value: "yes", label: "Yes" },
-      ]},
-      { key: "visited_other_countries", label: "Visited other countries in the past 6 months?", type: "select", required: true, options: [
-        { value: "no", label: "No" },{ value: "yes", label: "Yes" },
-      ]},
+      {
+        key: "visited_ghana_before", label: "Have you visited Ghana before?", type: "select", required: true, options: [
+          { value: "no", label: "No" }, { value: "yes", label: "Yes" },
+        ]
+      },
+      {
+        key: "visited_other_countries", label: "Visited other countries in the past 6 months?", type: "select", required: true, options: [
+          { value: "no", label: "No" }, { value: "yes", label: "Yes" },
+        ]
+      },
+      { key: "visited_country_1", label: "African Country 1 (Optional)", type: "select", required: false, options: [], conditionalOn: { field: "visited_other_countries", value: "yes" } },
+      { key: "visited_country_2", label: "African Country 2 (Optional)", type: "select", required: false, options: [], conditionalOn: { field: "visited_other_countries", value: "yes" } },
+      { key: "visited_country_3", label: "African Country 3 (Optional)", type: "select", required: false, options: [], conditionalOn: { field: "visited_other_countries", value: "yes" } },
       { key: "purpose_of_visit", label: "Purpose of Visit", type: "textarea", placeholder: "Describe your purpose for visiting Ghana...", required: true, fullWidth: true },
       { key: "accommodation_type", label: "Accommodation Arrangements", type: "select", required: true, options: ACCOMMODATION_OPTIONS },
     ],
@@ -267,11 +274,13 @@ export const VISA_CONFIGS: Record<string, VisaTypeConfig> = {
       { key: "host_company_address", label: "Host Company Address", type: "text", placeholder: "Full address in Ghana", required: true, fullWidth: true },
       { key: "host_contact_name", label: "Contact Person at Host", type: "text", placeholder: "Full name", required: true },
       { key: "host_contact_phone", label: "Contact Phone", type: "tel", placeholder: "+233 XX XXX XXXX", required: true },
-      { key: "business_purpose", label: "Nature of Business", type: "select", required: true, options: [
-        { value: "meetings", label: "Business Meetings" },{ value: "negotiation", label: "Contract Negotiation" },
-        { value: "trade", label: "Trade & Export/Import" },{ value: "investment", label: "Investment Exploration" },
-        { value: "consulting", label: "Consulting/Advisory" },{ value: "other", label: "Other" },
-      ]},
+      {
+        key: "business_purpose", label: "Nature of Business", type: "select", required: true, options: [
+          { value: "meetings", label: "Business Meetings" }, { value: "negotiation", label: "Contract Negotiation" },
+          { value: "trade", label: "Trade & Export/Import" }, { value: "investment", label: "Investment Exploration" },
+          { value: "consulting", label: "Consulting/Advisory" }, { value: "other", label: "Other" },
+        ]
+      },
       { key: "business_details", label: "Business Activity Details", type: "textarea", placeholder: "Describe planned activities...", required: true, fullWidth: true },
       { key: "address_in_ghana", label: "Accommodation in Ghana", type: "text", placeholder: "Hotel or residence", required: true, fullWidth: true },
     ],
@@ -296,22 +305,28 @@ export const VISA_CONFIGS: Record<string, VisaTypeConfig> = {
     specificFields: [
       { key: "institution_name", label: "Institution in Ghana", type: "text", placeholder: "e.g. University of Ghana, Legon", required: true, fullWidth: true },
       { key: "course_of_study", label: "Programme / Course", type: "text", placeholder: "e.g. MSc International Relations", required: true },
-      { key: "study_level", label: "Level of Study", type: "select", required: true, options: [
-        { value: "undergraduate", label: "Undergraduate" },{ value: "postgraduate", label: "Postgraduate (Master's)" },
-        { value: "doctoral", label: "Doctoral (PhD)" },{ value: "diploma", label: "Diploma/Certificate" },
-        { value: "exchange", label: "Exchange Programme" },
-      ]},
+      {
+        key: "study_level", label: "Level of Study", type: "select", required: true, options: [
+          { value: "undergraduate", label: "Undergraduate" }, { value: "postgraduate", label: "Postgraduate (Master's)" },
+          { value: "doctoral", label: "Doctoral (PhD)" }, { value: "diploma", label: "Diploma/Certificate" },
+          { value: "exchange", label: "Exchange Programme" },
+        ]
+      },
       { key: "study_start_date", label: "Programme Start Date", type: "date", required: true },
       { key: "study_end_date", label: "Expected Completion", type: "date", required: true },
-      { key: "sponsor_type", label: "Funding Source", type: "select", required: true, options: [
-        { value: "self", label: "Self-Funded" },{ value: "scholarship", label: "Scholarship" },
-        { value: "government", label: "Government Sponsorship" },{ value: "family", label: "Family" },
-      ]},
+      {
+        key: "sponsor_type", label: "Funding Source", type: "select", required: true, options: [
+          { value: "self", label: "Self-Funded" }, { value: "scholarship", label: "Scholarship" },
+          { value: "government", label: "Government Sponsorship" }, { value: "family", label: "Family" },
+        ]
+      },
       { key: "sponsor_name", label: "Sponsor Name", type: "text", placeholder: "Name of sponsor/scholarship body", required: false },
-      { key: "accommodation_type", label: "Accommodation", type: "select", required: true, options: [
-        { value: "campus", label: "On-Campus" },{ value: "hostel", label: "Student Hostel" },
-        { value: "private", label: "Private Accommodation" },{ value: "pending", label: "To Be Arranged" },
-      ]},
+      {
+        key: "accommodation_type", label: "Accommodation", type: "select", required: true, options: [
+          { value: "campus", label: "On-Campus" }, { value: "hostel", label: "Student Hostel" },
+          { value: "private", label: "Private Accommodation" }, { value: "pending", label: "To Be Arranged" },
+        ]
+      },
       { key: "address_in_ghana", label: "Address in Ghana", type: "text", placeholder: "Student accommodation address", required: false, fullWidth: true },
     ],
     tips: [
@@ -339,13 +354,17 @@ export const VISA_CONFIGS: Record<string, VisaTypeConfig> = {
       { key: "employer_phone", label: "Employer Phone", type: "tel", placeholder: "+233 XX XXX XXXX", required: true },
       { key: "job_title", label: "Job Title/Position", type: "text", placeholder: "e.g. Senior Engineer", required: true },
       { key: "employment_start", label: "Employment Start Date", type: "date", required: true },
-      { key: "employment_duration", label: "Contract Duration", type: "select", required: true, options: [
-        { value: "6months", label: "6 Months" },{ value: "1year", label: "1 Year" },{ value: "2years", label: "2 Years" },
-      ]},
-      { key: "salary_range", label: "Annual Salary Range (USD)", type: "select", required: true, options: [
-        { value: "under_20k", label: "Under $20,000" },{ value: "20k_50k", label: "$20,000 - $50,000" },
-        { value: "50k_100k", label: "$50,000 - $100,000" },{ value: "over_100k", label: "Over $100,000" },
-      ]},
+      {
+        key: "employment_duration", label: "Contract Duration", type: "select", required: true, options: [
+          { value: "6months", label: "6 Months" }, { value: "1year", label: "1 Year" }, { value: "2years", label: "2 Years" },
+        ]
+      },
+      {
+        key: "salary_range", label: "Annual Salary Range (USD)", type: "select", required: true, options: [
+          { value: "under_20k", label: "Under $20,000" }, { value: "20k_50k", label: "$20,000 - $50,000" },
+          { value: "50k_100k", label: "$50,000 - $100,000" }, { value: "over_100k", label: "Over $100,000" },
+        ]
+      },
       { key: "address_in_ghana", label: "Residential Address in Ghana", type: "text", placeholder: "Where you will reside", required: true, fullWidth: true },
     ],
     tips: [
@@ -390,11 +409,13 @@ export const VISA_CONFIGS: Record<string, VisaTypeConfig> = {
     ],
     specificFields: [
       { key: "hospital_name", label: "Hospital/Clinic Name", type: "text", placeholder: "e.g. Korle Bu Teaching Hospital", required: true, fullWidth: true },
-      { key: "treatment_type", label: "Type of Treatment", type: "select", required: true, options: [
-        { value: "surgery", label: "Surgery" },{ value: "specialist", label: "Specialist Consultation" },
-        { value: "therapy", label: "Ongoing Therapy" },{ value: "diagnostic", label: "Diagnostic Tests" },
-        { value: "traditional", label: "Traditional Medicine" },{ value: "other", label: "Other" },
-      ]},
+      {
+        key: "treatment_type", label: "Type of Treatment", type: "select", required: true, options: [
+          { value: "surgery", label: "Surgery" }, { value: "specialist", label: "Specialist Consultation" },
+          { value: "therapy", label: "Ongoing Therapy" }, { value: "diagnostic", label: "Diagnostic Tests" },
+          { value: "traditional", label: "Traditional Medicine" }, { value: "other", label: "Other" },
+        ]
+      },
       { key: "appointment_date", label: "Appointment/Admission Date", type: "date", required: true },
       { key: "treating_doctor", label: "Treating Doctor Name", type: "text", placeholder: "Doctor's name at Ghana hospital", required: false },
       { key: "accompanying_persons", label: "Accompanying Persons", type: "number", placeholder: "0", required: true, validation: { min: 0, max: 5 } },
@@ -423,10 +444,12 @@ export const VISA_CONFIGS: Record<string, VisaTypeConfig> = {
       { key: "event_end", label: "Event End Date", type: "date", required: true },
       { key: "event_venue", label: "Event Venue/Location", type: "text", placeholder: "e.g. Accra International Conference Centre", required: true, fullWidth: true },
       { key: "organizer_name", label: "Organiser Name", type: "text", placeholder: "Organisation hosting the event", required: true },
-      { key: "role_at_event", label: "Your Role", type: "select", required: true, options: [
-        { value: "attendee", label: "Attendee" },{ value: "speaker", label: "Speaker/Presenter" },
-        { value: "exhibitor", label: "Exhibitor" },{ value: "organizer", label: "Co-Organiser" },
-      ]},
+      {
+        key: "role_at_event", label: "Your Role", type: "select", required: true, options: [
+          { value: "attendee", label: "Attendee" }, { value: "speaker", label: "Speaker/Presenter" },
+          { value: "exhibitor", label: "Exhibitor" }, { value: "organizer", label: "Co-Organiser" },
+        ]
+      },
       { key: "address_in_ghana", label: "Accommodation in Ghana", type: "text", placeholder: "Hotel or residence", required: true, fullWidth: true },
     ],
     tips: [
@@ -446,15 +469,19 @@ export const VISA_CONFIGS: Record<string, VisaTypeConfig> = {
     specificFields: [
       { key: "diplomatic_rank", label: "Diplomatic Rank/Title", type: "text", placeholder: "e.g. Third Secretary", required: true },
       { key: "sending_ministry", label: "Sending Ministry/Department", type: "text", placeholder: "Ministry of Foreign Affairs", required: true, fullWidth: true },
-      { key: "mission_type", label: "Mission Type", type: "select", required: true, options: [
-        { value: "embassy", label: "Embassy Posting" },{ value: "consular", label: "Consular Mission" },
-        { value: "international_org", label: "International Organisation" },{ value: "special_mission", label: "Special Mission" },
-      ]},
+      {
+        key: "mission_type", label: "Mission Type", type: "select", required: true, options: [
+          { value: "embassy", label: "Embassy Posting" }, { value: "consular", label: "Consular Mission" },
+          { value: "international_org", label: "International Organisation" }, { value: "special_mission", label: "Special Mission" },
+        ]
+      },
       { key: "diplomatic_note_number", label: "Note Verbale Reference", type: "text", placeholder: "Reference number", required: true },
-      { key: "posting_duration", label: "Expected Duration of Posting", type: "select", required: true, options: [
-        { value: "6months", label: "Up to 6 Months" },{ value: "1year", label: "1 Year" },
-        { value: "2years", label: "2 Years" },{ value: "3years", label: "3+ Years" },
-      ]},
+      {
+        key: "posting_duration", label: "Expected Duration of Posting", type: "select", required: true, options: [
+          { value: "6months", label: "Up to 6 Months" }, { value: "1year", label: "1 Year" },
+          { value: "2years", label: "2 Years" }, { value: "3years", label: "3+ Years" },
+        ]
+      },
       { key: "dependents_count", label: "Number of Dependents", type: "number", placeholder: "0", required: true, validation: { min: 0, max: 10 } },
     ],
     tips: [
@@ -473,11 +500,13 @@ export const VISA_CONFIGS: Record<string, VisaTypeConfig> = {
       { key: "emergency_proof", label: "Emergency Supporting Document", description: "Hospital letter, death certificate, or relevant proof", required: true },
     ],
     specificFields: [
-      { key: "emergency_type", label: "Type of Emergency", type: "select", required: true, options: [
-        { value: "family_illness", label: "Family Member Illness" },{ value: "family_death", label: "Family Member Death" },
-        { value: "medical_self", label: "Personal Medical Emergency" },{ value: "natural_disaster", label: "Natural Disaster" },
-        { value: "other", label: "Other Humanitarian" },
-      ]},
+      {
+        key: "emergency_type", label: "Type of Emergency", type: "select", required: true, options: [
+          { value: "family_illness", label: "Family Member Illness" }, { value: "family_death", label: "Family Member Death" },
+          { value: "medical_self", label: "Personal Medical Emergency" }, { value: "natural_disaster", label: "Natural Disaster" },
+          { value: "other", label: "Other Humanitarian" },
+        ]
+      },
       { key: "emergency_description", label: "Emergency Description", type: "textarea", placeholder: "Describe the emergency situation...", required: true, fullWidth: true },
       { key: "contact_in_ghana", label: "Contact Person in Ghana", type: "text", placeholder: "Full name", required: true },
       { key: "contact_phone", label: "Contact Phone in Ghana", type: "tel", placeholder: "+233 XX XXX XXXX", required: true },

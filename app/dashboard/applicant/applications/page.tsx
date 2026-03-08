@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import api from "@/lib/api";
@@ -8,8 +8,9 @@ import { DashboardShell } from "@/components/layout/dashboard-shell";
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/data-table";
 import { StatusBadge } from "@/components/ui/badge";
-import { Plus } from "lucide-react";
+import { Plus, CheckCircle2 } from "lucide-react";
 import type { Application, PaginatedResponse } from "@/lib/types";
+import { Modal } from "@/components/ui/modal";
 
 export default function ApplicationsListPage() {
   const router = useRouter();
@@ -24,6 +25,35 @@ export default function ApplicationsListPage() {
         })
         .then((r) => r.data),
   });
+
+  // Visa Issued Popup Logic
+  const [issuedVisaToShow, setIssuedVisaToShow] = useState<Application | null>(null);
+
+  useEffect(() => {
+    if (!data?.data) return;
+
+    // Find the first issued visa
+    const issuedVisas = data.data.filter((app) => app.status === "issued");
+
+    // Check localStorage for seen visas
+    const seenVisas = JSON.parse(localStorage.getItem("seen_issued_visas") || "[]");
+
+    // Show popup for the first unseen issued visa
+    for (const app of issuedVisas) {
+      if (!seenVisas.includes(app.id)) {
+        setIssuedVisaToShow(app);
+        break; // Show one at a time
+      }
+    }
+  }, [data?.data]);
+
+  const handleClosePopup = () => {
+    if (issuedVisaToShow) {
+      const seenVisas = JSON.parse(localStorage.getItem("seen_issued_visas") || "[]");
+      localStorage.setItem("seen_issued_visas", JSON.stringify([...seenVisas, issuedVisaToShow.id]));
+      setIssuedVisaToShow(null);
+    }
+  };
 
   const columns = [
     {
@@ -96,6 +126,43 @@ export default function ApplicationsListPage() {
         loading={isLoading}
         emptyMessage="No applications found. Start by creating a new application."
       />
+
+      {/* Visa Issued Congratulatory Popup */}
+      {issuedVisaToShow && (
+        <Modal
+          isOpen={true}
+          onClose={handleClosePopup}
+          title="Congratulations!"
+        >
+          <div className="text-center py-6">
+            <div className="w-20 h-20 bg-success/10 rounded-full flex items-center justify-center mx-auto mb-6">
+              <CheckCircle2 size={40} className="text-success" />
+            </div>
+            <h2 className="text-2xl font-bold text-text-primary mb-2">
+              Your Visa is Ready!
+            </h2>
+            <p className="text-text-secondary mb-6 text-sm">
+              Your application ({issuedVisaToShow.reference_number}) for a {issuedVisaToShow.visa_type?.name} has been approved and issued. You can now download your eVisa document from the application details page.
+            </p>
+            <div className="flex gap-3 justify-center">
+              <Button
+                variant="secondary"
+                onClick={handleClosePopup}
+              >
+                Close
+              </Button>
+              <Button
+                onClick={() => {
+                  handleClosePopup();
+                  router.push(`/dashboard/applicant/applications/${issuedVisaToShow.id}`);
+                }}
+              >
+                View eVisa
+              </Button>
+            </div>
+          </div>
+        </Modal>
+      )}
     </DashboardShell>
   );
 }

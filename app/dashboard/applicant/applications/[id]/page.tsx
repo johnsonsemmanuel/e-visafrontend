@@ -50,12 +50,12 @@ export default function ApplicationDetailPage() {
   // Create eVisa preview data from application data
   const eVisaData = useMemo(() => {
     if (!appData?.application) return null;
-    
+
     const app = appData.application;
-    
+
     // Only show eVisa preview for approved/issued applications
     if (!["approved", "issued"].includes(app.status)) return null;
-    
+
     return {
       reference_number: app.reference_number,
       full_name: app.first_name + ' ' + app.last_name,
@@ -272,9 +272,15 @@ export default function ApplicationDetailPage() {
             </div>
             <div className="grid sm:grid-cols-2 gap-3">
               <div className="info-field"><p className="info-label">Full Name</p><p className="info-value">{application.first_name} {application.last_name}</p></div>
-              <div className="info-field"><p className="info-label">Passport Number</p><p className="info-value font-mono tracking-wide">{application.passport_number || "—"}</p></div>
-              <div className="info-field"><p className="info-label">Nationality</p><p className="info-value">{application.nationality || "—"}</p></div>
               <div className="info-field"><p className="info-label">Date of Birth</p><p className="info-value">{application.date_of_birth ? new Date(application.date_of_birth).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" }) : "—"}</p></div>
+              <div className="info-field"><p className="info-label">Gender</p><p className="info-value capitalize">{application.gender || "—"}</p></div>
+              <div className="info-field"><p className="info-label">Place of Birth</p><p className="info-value uppercase">{application.country_of_birth || "—"}</p></div>
+              <div className="info-field"><p className="info-label">Nationality</p><p className="info-value">{application.nationality || "—"}</p></div>
+              <div className="info-field"><p className="info-label">Marital Status</p><p className="info-value capitalize">{application.marital_status || "—"}</p></div>
+              <div className="info-field"><p className="info-label">Occupation</p><p className="info-value capitalize">{application.profession || "—"}</p></div>
+              <div className="info-field"><p className="info-label">Passport Number</p><p className="info-value font-mono tracking-wide">{application.passport_number || "—"}</p></div>
+              <div className="info-field"><p className="info-label">Passport Issue Date</p><p className="info-value">{application.passport_issue_date || "—"}</p></div>
+              <div className="info-field"><p className="info-label">Passport Expiry Date</p><p className="info-value">{application.passport_expiry || "—"}</p></div>
             </div>
           </div>
 
@@ -289,8 +295,57 @@ export default function ApplicationDetailPage() {
             <div className="grid sm:grid-cols-2 gap-3">
               <div className="info-field"><p className="info-label">Intended Arrival</p><p className="info-value">{application.intended_arrival ? new Date(application.intended_arrival).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" }) : "—"}</p></div>
               <div className="info-field"><p className="info-label">Duration of Stay</p><p className="info-value">{application.duration_days ? `${application.duration_days} days` : "—"}</p></div>
+              <div className="info-field sm:col-span-2"><p className="info-label">Port of Entry</p><p className="info-value">{application.port_of_entry || "—"}</p></div>
               <div className="info-field sm:col-span-2"><p className="info-label">Address in Ghana</p><p className="info-value">{application.address_in_ghana || "—"}</p></div>
               <div className="info-field sm:col-span-2"><p className="info-label">Purpose of Visit</p><p className="info-value">{application.purpose_of_visit || "—"}</p></div>
+              {(application.visited_country_1 || application.visited_country_2 || application.visited_country_3) && (
+                <div className="info-field sm:col-span-2">
+                  <p className="info-label">Recently Visited Countries</p>
+                  <p className="info-value">
+                    {[application.visited_country_1, application.visited_country_2, application.visited_country_3].filter(Boolean).join(", ")}
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Health & Security Declarations */}
+          <div className="card">
+            <div className="flex items-center gap-2.5 mb-5">
+              <div className="w-8 h-8 rounded-lg bg-success/8 flex items-center justify-center">
+                <CheckCircle2 size={16} className="text-success" />
+              </div>
+              <h2 className="text-base font-bold text-text-primary">Health & Security Declarations</h2>
+            </div>
+            <div className="grid sm:grid-cols-2 gap-3">
+              <div className="info-field">
+                <p className="info-label">High Fever</p>
+                <div className="flex items-center gap-2">
+                  <div className={`w-2 h-2 rounded-full ${application.health_declaration_fever ? 'bg-error-main' : 'bg-success-main'}`}></div>
+                  <p className="info-value">{application.health_declaration_fever ? "Yes" : "No"}</p>
+                </div>
+              </div>
+              <div className="info-field">
+                <p className="info-label">Coughing / Breathing Difficulties</p>
+                <div className="flex items-center gap-2">
+                  <div className={`w-2 h-2 rounded-full ${application.health_declaration_cough ? 'bg-error-main' : 'bg-success-main'}`}></div>
+                  <p className="info-value">{application.health_declaration_cough || application.health_declaration_breathing ? "Yes" : "No"}</p>
+                </div>
+              </div>
+              <div className="info-field">
+                <p className="info-label">Yellow Fever Immunization</p>
+                <div className="flex items-center gap-2">
+                  <div className={`w-2 h-2 rounded-full ${application.health_declaration_yellow_fever ? 'bg-success-main' : 'bg-error-main'}`}></div>
+                  <p className="info-value">{application.health_declaration_yellow_fever ? "Yes" : "No"}</p>
+                </div>
+              </div>
+              <div className="info-field">
+                <p className="info-label">Criminal Conviction</p>
+                <div className="flex items-center gap-2">
+                  <div className={`w-2 h-2 rounded-full ${application.security_declaration_convicted ? 'bg-error-main' : 'bg-success-main'}`}></div>
+                  <p className="info-value">{application.security_declaration_convicted ? "Yes" : "No"}</p>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -402,9 +457,9 @@ export default function ApplicationDetailPage() {
       </div>
 
       {showEvisaPreview && (
-        <EVisaPreview 
-          isOpen={showEvisaPreview} 
-          onClose={() => setShowEvisaPreview(false)} 
+        <EVisaPreview
+          isOpen={showEvisaPreview}
+          onClose={() => setShowEvisaPreview(false)}
           data={eVisaData}
         />
       )}

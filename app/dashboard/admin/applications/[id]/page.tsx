@@ -145,10 +145,52 @@ export default function AdminApplicationDetailPage() {
                 </div>
               </div>
               <div className="flex items-center gap-3">
+                <User size={16} className="text-text-muted" />
+                <div>
+                  <p className="text-xs text-text-muted">Gender</p>
+                  <p className="text-sm font-medium text-text-primary capitalize">{application.gender || "—"}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <Globe size={16} className="text-text-muted" />
+                <div>
+                  <p className="text-xs text-text-muted">Place of Birth</p>
+                  <p className="text-sm font-medium text-text-primary uppercase">{application.country_of_birth || "—"}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <FileText size={16} className="text-text-muted" />
+                <div>
+                  <p className="text-xs text-text-muted">Marital Status</p>
+                  <p className="text-sm font-medium text-text-primary capitalize">{application.marital_status || "—"}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <FileText size={16} className="text-text-muted" />
+                <div>
+                  <p className="text-xs text-text-muted">Occupation/Profession</p>
+                  <p className="text-sm font-medium text-text-primary">{application.profession || "—"}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
                 <FileText size={16} className="text-text-muted" />
                 <div>
                   <p className="text-xs text-text-muted">Passport Number</p>
                   <p className="text-sm font-medium text-text-primary font-mono">{application.passport_number}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <FileText size={16} className="text-text-muted" />
+                <div>
+                  <p className="text-xs text-text-muted">Issue Date</p>
+                  <p className="text-sm font-medium text-text-primary">{application.passport_issue_date || "—"}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <FileText size={16} className="text-text-muted" />
+                <div>
+                  <p className="text-xs text-text-muted">Expiry Date</p>
+                  <p className="text-sm font-medium text-text-primary">{application.passport_expiry || "—"}</p>
                 </div>
               </div>
               <div className="flex items-center gap-3">
@@ -206,10 +248,66 @@ export default function AdminApplicationDetailPage() {
                 </div>
               </div>
               <div className="flex items-start gap-3 md:col-span-2">
+                <MapPin size={16} className="text-text-muted mt-0.5" />
+                <div>
+                  <p className="text-xs text-text-muted">Port of Entry</p>
+                  <p className="text-sm font-medium text-text-primary">{application.port_of_entry || "—"}</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3 md:col-span-2">
                 <FileText size={16} className="text-text-muted mt-0.5" />
                 <div>
                   <p className="text-xs text-text-muted">Purpose of Visit</p>
                   <p className="text-sm font-medium text-text-primary">{application.purpose_of_visit || "—"}</p>
+                </div>
+              </div>
+              {(application.visited_country_1 || application.visited_country_2 || application.visited_country_3) && (
+                <div className="flex items-start gap-3 md:col-span-2">
+                  <Globe size={16} className="text-text-muted mt-0.5" />
+                  <div>
+                    <p className="text-xs text-text-muted">Recently Visited Countries</p>
+                    <p className="text-sm font-medium text-text-primary">
+                      {[application.visited_country_1, application.visited_country_2, application.visited_country_3].filter(Boolean).join(", ")}
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Health & Security Info */}
+          <div className="card">
+            <div className="flex items-center gap-2 mb-4">
+              <Globe size={18} className="text-accent" />
+              <h2 className="text-lg font-semibold text-text-primary">Health & Security Declarations</h2>
+            </div>
+            <div className="grid md:grid-cols-2 gap-4">
+              <div className="flex items-center gap-3">
+                <div className={`w-3 h-3 rounded-full ${application.health_declaration_fever ? 'bg-error-main' : 'bg-success-main'}`}></div>
+                <div>
+                  <p className="text-xs text-text-muted">High Fever</p>
+                  <p className="text-sm font-medium text-text-primary">{application.health_declaration_fever ? "Yes" : "No"}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className={`w-3 h-3 rounded-full ${application.health_declaration_cough ? 'bg-error-main' : 'bg-success-main'}`}></div>
+                <div>
+                  <p className="text-xs text-text-muted">Coughing / Breathing Difficulties</p>
+                  <p className="text-sm font-medium text-text-primary">{application.health_declaration_cough || application.health_declaration_breathing ? "Yes" : "No"}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className={`w-3 h-3 rounded-full ${application.health_declaration_yellow_fever ? 'bg-success-main' : 'bg-error-main'}`}></div>
+                <div>
+                  <p className="text-xs text-text-muted">Yellow Fever Immunized</p>
+                  <p className="text-sm font-medium text-text-primary">{application.health_declaration_yellow_fever ? "Yes" : "No"}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className={`w-3 h-3 rounded-full ${application.security_declaration_convicted ? 'bg-error-main' : 'bg-success-main'}`}></div>
+                <div>
+                  <p className="text-xs text-text-muted">Criminal Conviction</p>
+                  <p className="text-sm font-medium text-text-primary">{application.security_declaration_convicted ? "Yes" : "No"}</p>
                 </div>
               </div>
             </div>
@@ -280,10 +378,9 @@ export default function AdminApplicationDetailPage() {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-sm text-text-muted">Status</span>
-                  <span className={`text-sm font-medium ${
-                    application.payment.status === 'completed' ? 'text-success' :
+                  <span className={`text-sm font-medium ${application.payment.status === 'completed' ? 'text-success' :
                     application.payment.status === 'failed' ? 'text-danger' : 'text-warning'
-                  }`}>
+                    }`}>
                     {application.payment.status.charAt(0).toUpperCase() + application.payment.status.slice(1)}
                   </span>
                 </div>
@@ -359,7 +456,7 @@ export default function AdminApplicationDetailPage() {
           isOpen={true}
           document={previewDoc}
           onClose={() => setPreviewDoc(null)}
-          baseUrl={process.env.NEXT_PUBLIC_API_URL}
+          downloadUrl={`${process.env.NEXT_PUBLIC_API_URL}/admin/applications/${application.id}/documents/${previewDoc.id}/download`}
         />
       )}
     </DashboardShell>

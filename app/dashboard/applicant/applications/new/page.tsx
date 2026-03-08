@@ -195,17 +195,49 @@ function NewApplicationPageInner() {
       .then(res => {
         const app = res.data.application;
         setApplication(app);
+
+        // Map all fields from the backend application object to our form state
         setForm(prev => ({
           ...prev,
           visa_type_id: app.visa_type_id?.toString() || prev.visa_type_id,
           first_name: app.first_name || prev.first_name,
           last_name: app.last_name || prev.last_name,
+          other_names: app.other_names || prev.other_names,
+          gender: app.gender || prev.gender,
+          date_of_birth: app.date_of_birth || prev.date_of_birth,
+          marital_status: app.marital_status || prev.marital_status,
+          profession: app.profession || prev.profession,
+          country_of_birth: app.country_of_birth || prev.country_of_birth,
+          nationality: app.nationality || prev.nationality,
+          passport_number: app.passport_number || prev.passport_number,
+          passport_issue_date: app.passport_issue_date || prev.passport_issue_date,
+          passport_expiry: app.passport_expiry || prev.passport_expiry,
           email: app.email || prev.email,
           phone: app.phone || prev.phone,
-          nationality: app.nationality || prev.nationality,
-          date_of_birth: app.date_of_birth || prev.date_of_birth,
-          passport_number: app.passport_number || prev.passport_number,
+
+          // Travel Details
+          intended_arrival: app.intended_arrival ? app.intended_arrival.split('T')[0] : prev.intended_arrival,
+          duration_days: app.duration_days?.toString() || prev.duration_days,
+          visa_duration: app.visa_duration || prev.visa_duration,
+          port_of_entry: app.port_of_entry || prev.port_of_entry,
+          destination_city: app.destination_city || prev.destination_city,
+          accommodation_type: app.accommodation_type || prev.accommodation_type,
+          address_in_ghana: app.address_in_ghana || prev.address_in_ghana,
+          purpose_of_visit: app.purpose_of_visit || prev.purpose_of_visit,
+          visited_other_countries: app.visited_other_countries || prev.visited_other_countries,
+          visited_country_1: app.visited_country_1 || prev.visited_country_1,
+          visited_country_2: app.visited_country_2 || prev.visited_country_2,
+          visited_country_3: app.visited_country_3 || prev.visited_country_3,
+
+          // Health Details
+          health_good_condition: app.health_good_condition || prev.health_good_condition,
+          health_recent_illness: app.health_recent_illness || prev.health_recent_illness,
+          health_contact_infectious: app.health_contact_infectious || prev.health_contact_infectious,
+          health_yellow_fever_vaccinated: app.health_yellow_fever_vaccinated || prev.health_yellow_fever_vaccinated,
+          health_chronic_conditions: app.health_chronic_conditions || prev.health_chronic_conditions,
+          health_condition_details: app.health_condition_details || prev.health_condition_details,
         }));
+
         const step = app.current_step || 1;
         setCurrentStep(step >= 1 ? step : 1);
         toast.success("Resuming your application", { icon: "📋" });
@@ -270,9 +302,12 @@ function NewApplicationPageInner() {
         email: form.email,
         phone: form.phone || undefined,
         gender: form.gender,
+        marital_status: form.marital_status,
+        profession: form.profession,
         passport_number: form.passport_number,
+        passport_issue_date: form.passport_issue_date || undefined,
         passport_expiry: form.passport_expiry || undefined,
-        place_of_birth: form.country_of_birth ? (countries.find(c => c.code === form.country_of_birth)?.name || form.country_of_birth) : undefined,
+        country_of_birth: form.country_of_birth || undefined,
       });
       setApplication(res.data.application);
       saveDraft(form, 3, res.data.application.id?.toString());
@@ -300,6 +335,16 @@ function NewApplicationPageInner() {
       payload.purpose_of_visit = form.purpose_of_visit || "";
       payload.port_of_entry = form.port_of_entry;
       payload.passport_expiry = form.passport_expiry;
+
+      // Include any dynamic fields from visa-matrix.ts that exist in the form state
+      if (visaConfig) {
+        for (const field of visaConfig.specificFields) {
+          if (form[field.key]) {
+            payload[field.key] = form[field.key];
+          }
+        }
+      }
+
       const res = await api.put(`/applicant/applications/${application.id}/step`, payload);
       setApplication(res.data.application);
       setCurrentStep((p) => p + 1);
@@ -592,7 +637,7 @@ function NewApplicationPageInner() {
                   </div>
                   <div className="text-right">
                     <p className="text-lg font-bold text-accent">
-                      ${fees.total > 0 ? fees.total.toFixed(2) : (260 * (form.entry_type === "multiple" ? 1.8 : 1) * (selST ? selST.fee_multiplier || 1 : 1)).toFixed(2)}
+                      ${fees.total > 0 ? fees.total.toFixed(2) : (260 * (form.entry_type === "multiple" ? 1.8 : 1) * Number(selST ? selST.fee_multiplier || 1 : 1)).toFixed(2)}
                     </p>
                     <div className="flex items-center gap-2">
                       <button type="button" onClick={() => setShowEntryTypeModal(true)} className="text-xs text-accent hover:underline cursor-pointer">Entry type</button>
@@ -1138,6 +1183,7 @@ function NewApplicationPageInner() {
                   {form.port_of_entry && <div><p className="text-xs text-text-muted">Port of Entry</p><p className="text-sm font-medium text-text-primary">{optLabel(PORTS_OF_ENTRY, form.port_of_entry)}</p></div>}
                   {form.destination_city && <div><p className="text-xs text-text-muted">Destination</p><p className="text-sm font-medium text-text-primary">{optLabel(DESTINATION_CITIES, form.destination_city)}</p></div>}
                   {form.accommodation_type && <div><p className="text-xs text-text-muted">Accommodation</p><p className="text-sm font-medium text-text-primary">{optLabel(ACCOMMODATION_OPTIONS, form.accommodation_type)}</p></div>}
+                  {form.visited_other_countries === "yes" && <div className="sm:col-span-2"><p className="text-xs text-text-muted">Recently Visited Countries</p><p className="text-sm font-medium text-text-primary">{[form.visited_country_1, form.visited_country_2, form.visited_country_3].filter(Boolean).map(c => countryName(c!)).join(", ") || "None listed"}</p></div>}
                   {form.purpose_of_visit && <div className="sm:col-span-2"><p className="text-xs text-text-muted">Purpose</p><p className="text-sm font-medium text-text-primary">{form.purpose_of_visit}</p></div>}
                 </div>
               </div>

@@ -29,8 +29,10 @@ import {
   Eye,
   Send,
   ShieldCheck,
+  Shield,
 } from "lucide-react";
 import { DocumentPreview } from "@/components/ui/document-preview";
+import { RiskPanel } from "@/components/ui/risk-panel";
 import toast from "react-hot-toast";
 import type { Application, ReasonCode } from "@/lib/types";
 
@@ -77,7 +79,7 @@ export default function MfaEscalationDetailPage() {
   useEffect(() => {
     api.get<{ reason_codes: ReasonCode[] }>("/mfa/reason-codes")
       .then((r) => setReasonCodes(r.data.reason_codes || []))
-      .catch(() => {});
+      .catch(() => { });
   }, []);
 
   const application = data?.application;
@@ -364,77 +366,165 @@ export default function MfaEscalationDetailPage() {
             </div>
           </div>
 
-          {/* Applicant */}
           <div className="card">
-            <div className="flex items-center gap-2 mb-4">
-              <User size={18} className="text-text-muted" />
-              <h2 className="text-lg font-semibold text-text-primary">
-                Applicant Information
-              </h2>
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <User size={18} className="text-text-muted" />
+                <h2 className="text-lg font-semibold text-text-primary">Applicant Profile</h2>
+              </div>
             </div>
-            <div className="grid sm:grid-cols-2 gap-4 text-sm">
+
+            <div className="flex flex-col md:flex-row gap-6 mb-6">
+              {/* Profile Photo - We'll use a placeholder or initials if real photo isn't available yet */}
+              <div className="hidden md:flex flex-col items-center">
+                <div className="w-32 h-32 bg-background rounded-lg border-2 border-border overflow-hidden flex items-center justify-center relative mb-2">
+                  <User size={48} className="text-text-muted opacity-50 absolute" />
+                  {/* Photo would go here once we have a dedicated photo endpoint */}
+                  <div className="absolute inset-x-0 bottom-0 bg-background/80 flex items-center justify-center mt-20 h-10 backdrop-blur-sm shadow-sm py-1">
+                    <span className="text-[14px] text-text-secondary tracking-widest font-mono font-bold font-black pointer-events-none select-none">SCAN MATCH</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Core Details */}
+              <div className="flex-1 space-y-4">
+                <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+                  <div>
+                    <h3 className="text-xs text-text-muted uppercase tracking-wider mb-0.5">Surname</h3>
+                    <p className="text-lg font-semibold text-text-primary uppercase">{application.last_name}</p>
+                  </div>
+                  <div>
+                    <h3 className="text-xs text-text-muted uppercase tracking-wider mb-0.5">Given Names</h3>
+                    <p className="text-lg font-semibold text-text-primary uppercase">{application.first_name}</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+                  <div className="flex items-center justify-between border-b border-border pb-1">
+                    <span className="text-xs text-text-muted">Nationality</span>
+                    <span className="text-sm font-medium text-text-primary uppercase text-right">{application.nationality}</span>
+                  </div>
+                  <div className="flex items-center justify-between border-b border-border pb-1">
+                    <span className="text-xs text-text-muted">Gender</span>
+                    <span className="text-sm font-medium text-text-primary uppercase text-right">{application.gender || "—"}</span>
+                  </div>
+                  <div className="flex items-center justify-between border-b border-border pb-1">
+                    <span className="text-xs text-text-muted">Date of Birth</span>
+                    <span className="text-sm font-medium text-text-primary text-right">{application.date_of_birth}</span>
+                  </div>
+                  <div className="flex items-center justify-between border-b border-border pb-1">
+                    <span className="text-xs text-text-muted">Place of Birth</span>
+                    <span className="text-sm font-medium text-text-primary uppercase text-right">{application.country_of_birth || "—"}</span>
+                  </div>
+                  <div className="flex items-center justify-between border-b border-border pb-1">
+                    <span className="text-xs text-text-muted">Marital Status</span>
+                    <span className="text-sm font-medium text-text-primary capitalize text-right">{application.marital_status || "—"}</span>
+                  </div>
+                  <div className="flex items-center justify-between border-b border-border pb-1">
+                    <span className="text-xs text-text-muted">Occupation</span>
+                    <span className="text-sm font-medium text-text-primary uppercase text-right">{application.profession || "—"}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Sub Details Grid */}
+            <div className="grid sm:grid-cols-3 gap-4 text-sm border-t border-border pt-4">
               <div>
-                <p className="text-text-muted mb-0.5">Applicant</p>
-                <p className="text-text-primary font-medium">
-                  {application.user
-                    ? `${application.user.first_name} ${application.user.last_name}`
-                    : "—"}
-                </p>
+                <p className="text-text-muted mb-0.5">Passport Number</p>
+                <p className="text-text-primary font-medium font-mono">{application.passport_number}</p>
+              </div>
+              <div>
+                <p className="text-text-muted mb-0.5">Issue Date</p>
+                <p className="text-text-primary font-medium">{application.passport_issue_date || "—"}</p>
+              </div>
+              <div>
+                <p className="text-text-muted mb-0.5">Expiry Date</p>
+                <p className="text-text-primary font-medium">{application.passport_expiry || "—"}</p>
               </div>
               <div>
                 <p className="text-text-muted mb-0.5">Email</p>
-                <p className="text-text-primary font-medium">
-                  {application.user?.email || "—"}
-                </p>
+                <p className="text-text-primary font-medium">{application.email}</p>
               </div>
               <div>
-                <p className="text-text-muted mb-0.5">Passport</p>
-                <p className="text-text-primary font-medium">
-                  {application.passport_number}
-                </p>
-              </div>
-              <div>
-                <p className="text-text-muted mb-0.5">Nationality</p>
-                <p className="text-text-primary font-medium">
-                  {application.nationality}
-                </p>
+                <p className="text-text-muted mb-0.5">Phone</p>
+                <p className="text-text-primary font-medium">{application.phone || "—"}</p>
               </div>
             </div>
           </div>
 
-          {/* Travel */}
+          {/* Risk Intelligence Panel */}
+          <div className="card">
+            <div className="flex items-center gap-2 mb-4">
+              <Shield size={18} className="text-text-muted" />
+              <h2 className="text-lg font-semibold text-text-primary">Risk Intelligence</h2>
+            </div>
+            <RiskPanel
+              riskScore={application.riskAssessment?.risk_score ?? application.risk_score ?? null}
+              riskLevel={(application.riskAssessment?.risk_level ?? application.risk_level) as "low" | "medium" | "high" | "critical" | null}
+              watchlistFlagged={application.riskAssessment?.watchlist_match ?? application.watchlist_flagged ?? false}
+              factors={application.riskAssessment?.factors ?? []}
+              recommendations={
+                application.risk_level === "high" || application.risk_level === "critical"
+                  ? [
+                    { priority: "high", action: "MANUAL_REVIEW_REQUIRED", reason: "High risk score detected" },
+                    { priority: "medium", action: "VERIFY_DOCUMENTS", reason: "Additional document verification recommended" },
+                  ]
+                  : application.risk_level === "medium"
+                    ? [
+                      { priority: "medium", action: "ENHANCED_SCREENING", reason: "Medium risk - enhanced screening advised" },
+                    ]
+                    : [
+                      { priority: "info", action: "APPROVE_RECOMMENDED", reason: "Low risk profile - standard processing" },
+                    ]
+              }
+            />
+          </div>
+
+          {/* Travel & Accommodation */}
           <div className="card">
             <div className="flex items-center gap-2 mb-4">
               <Plane size={18} className="text-text-muted" />
-              <h2 className="text-lg font-semibold text-text-primary">
-                Travel Details
-              </h2>
+              <h2 className="text-lg font-semibold text-text-primary">Travel & Accommodation</h2>
             </div>
-            <div className="grid sm:grid-cols-2 gap-4 text-sm">
-              <div>
-                <p className="text-text-muted mb-0.5">Arrival</p>
-                <p className="text-text-primary font-medium">
-                  {application.intended_arrival
-                    ? new Date(
-                        application.intended_arrival
-                      ).toLocaleDateString()
-                    : "—"}
-                </p>
+            <div className="grid sm:grid-cols-2 gap-y-4 gap-x-8 text-sm">
+              <div className="space-y-3">
+                <div>
+                  <p className="text-xs text-text-muted mb-0.5 uppercase tracking-wider">Arrival Date</p>
+                  <p className="text-text-primary font-medium">{application.intended_arrival ? new Date(application.intended_arrival).toLocaleDateString() : "—"}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-text-muted mb-0.5 uppercase tracking-wider">Duration of Stay</p>
+                  <p className="text-text-primary font-medium">{application.duration_days ? `${application.duration_days} days` : "—"}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-text-muted mb-0.5 uppercase tracking-wider">Port of Entry</p>
+                  <p className="text-text-primary font-medium">{application.port_of_entry || "—"}</p>
+                </div>
               </div>
-              <div>
-                <p className="text-text-muted mb-0.5">Duration</p>
-                <p className="text-text-primary font-medium">
-                  {application.duration_days
-                    ? `${application.duration_days} days`
-                    : "—"}
-                </p>
+
+              <div className="space-y-3">
+                <div>
+                  <p className="text-xs text-text-muted mb-0.5 uppercase tracking-wider">Purpose of Visit</p>
+                  <p className="text-text-primary font-medium">{application.purpose_of_visit || "—"}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-text-muted mb-0.5 uppercase tracking-wider">Address in Ghana</p>
+                  <p className="text-text-primary font-medium leading-relaxed">{application.address_in_ghana || "—"}</p>
+                </div>
               </div>
-              <div className="sm:col-span-2">
-                <p className="text-text-muted mb-0.5">Purpose</p>
-                <p className="text-text-primary font-medium">
-                  {application.purpose_of_visit || "—"}
-                </p>
-              </div>
+
+              {/* Visited Countries */}
+              {(application.visited_country_1 || application.visited_country_2 || application.visited_country_3) && (
+                <div className="sm:col-span-2 pt-3 border-t border-border mt-1">
+                  <p className="text-xs text-text-muted mb-2 uppercase tracking-wider">Recently Visited Countries</p>
+                  <div className="flex flex-wrap gap-2">
+                    {application.visited_country_1 && <span className="px-2.5 py-1 bg-background text-text-secondary text-xs rounded-md border border-border">{application.visited_country_1}</span>}
+                    {application.visited_country_2 && <span className="px-2.5 py-1 bg-background text-text-secondary text-xs rounded-md border border-border">{application.visited_country_2}</span>}
+                    {application.visited_country_3 && <span className="px-2.5 py-1 bg-background text-text-secondary text-xs rounded-md border border-border">{application.visited_country_3}</span>}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
@@ -482,13 +572,12 @@ export default function MfaEscalationDetailPage() {
                         <Eye size={14} />
                       </button>
                       <span
-                        className={`badge ${
-                          doc.verification_status === "verified"
-                            ? "badge-success"
-                            : doc.verification_status === "rejected"
-                              ? "badge-danger"
-                              : "badge-info"
-                        }`}
+                        className={`badge ${doc.verification_status === "verified"
+                          ? "badge-success"
+                          : doc.verification_status === "rejected"
+                            ? "badge-danger"
+                            : "badge-info"
+                          }`}
                       >
                         {doc.verification_status || "Pending"}
                       </span>
@@ -523,11 +612,10 @@ export default function MfaEscalationDetailPage() {
                 <div>
                   <p className="text-text-muted mb-0.5">Status</p>
                   <span
-                    className={`badge ${
-                      application.payment.status === "completed"
-                        ? "badge-success"
-                        : "badge-warning"
-                    }`}
+                    className={`badge ${application.payment.status === "completed"
+                      ? "badge-success"
+                      : "badge-warning"
+                      }`}
                   >
                     {application.payment.status}
                   </span>
@@ -537,8 +625,8 @@ export default function MfaEscalationDetailPage() {
                   <p className="text-text-primary font-medium">
                     {application.payment.paid_at
                       ? new Date(
-                          application.payment.paid_at
-                        ).toLocaleString()
+                        application.payment.paid_at
+                      ).toLocaleString()
                       : "—"}
                   </p>
                 </div>
@@ -557,7 +645,7 @@ export default function MfaEscalationDetailPage() {
               </h2>
             </div>
             {application.status_history &&
-            application.status_history.length > 0 ? (
+              application.status_history.length > 0 ? (
               <Timeline
                 items={application.status_history.map((h) => ({
                   status: h.to_status,
@@ -580,7 +668,7 @@ export default function MfaEscalationDetailPage() {
               </h2>
             </div>
             {application.internal_notes &&
-            application.internal_notes.length > 0 ? (
+              application.internal_notes.length > 0 ? (
               <div className="space-y-3">
                 {application.internal_notes.map((note) => (
                   <div key={note.id} className="p-3 rounded-lg bg-surface">
@@ -840,7 +928,7 @@ export default function MfaEscalationDetailPage() {
         isOpen={!!previewDoc}
         onClose={() => setPreviewDoc(null)}
         document={previewDoc}
-        baseUrl={process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:8000'}
+        downloadUrl={previewDoc ? `${process.env.NEXT_PUBLIC_API_URL}/mfa/escalations/${id}/documents/${previewDoc.id}/download` : ""}
       />
     </DashboardShell>
   );
