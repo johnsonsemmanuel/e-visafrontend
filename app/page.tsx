@@ -97,7 +97,7 @@ export default function Home() {
           <div className="flex items-center justify-between h-18 py-4">
             <Link href="/" className="flex items-center gap-3">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/gis-logo.png" alt="Republic of Ghana" width={40} height={40} className="drop-shadow-md" />
+              <img src="/gis-logo-new.png" alt="Ghana Immigration Service" width={40} height={40} className="drop-shadow-md" />
               <div className="hidden sm:block">
                 <p className={`text-sm font-bold tracking-wide leading-tight ${scrolled ? "text-gray-900" : "text-white"}`}>
                   Republic of Ghana

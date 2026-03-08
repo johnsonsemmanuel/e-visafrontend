@@ -79,7 +79,7 @@ export default function HelpPage() {
           <div className="flex items-center justify-between py-4">
             <Link href="/" className="flex items-center gap-3">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/gis-logo.png" alt="Republic of Ghana" width={40} height={40} className="drop-shadow-md" />
+              <img src="/gis-logo-new.png" alt="Ghana Immigration Service" width={40} height={40} className="drop-shadow-md" />
               <div className="hidden sm:block">
                 <p className="text-sm font-bold text-gray-900 tracking-wide leading-tight">Republic of Ghana</p>
                 <p className="text-[10px] text-gray-400 tracking-widest uppercase">Electronic Visa Portal</p>
