@@ -20,6 +20,7 @@ import {
   CheckCircle2,
   CreditCard,
   ExternalLink,
+  Send,
 } from "lucide-react";
 
 const faqs = [
@@ -62,8 +63,21 @@ export default function HelpPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [openFaq, setOpenFaq] = useState<string | null>(null);
   const [activeCategory, setActiveCategory] = useState("General");
+  const [formStatus, setFormStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
+  const [formData, setFormData] = useState({ name: "", email: "", reference: "", message: "" });
 
   const currentFaqs = faqs.find((f) => f.category === activeCategory)?.items || [];
+
+  const handleContactSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setFormStatus("submitting");
+    // Simulate API call
+    setTimeout(() => {
+      setFormStatus("success");
+      setFormData({ name: "", email: "", reference: "", message: "" });
+      setTimeout(() => setFormStatus("idle"), 5000);
+    }, 1500);
+  };
 
   return (
     <div className="min-h-screen bg-white">
@@ -232,32 +246,117 @@ export default function HelpPage() {
           <h2 className="text-2xl font-extrabold text-gray-900 mb-2">Contact the Ghana Immigration Service</h2>
           <p className="text-gray-500 text-sm mb-8">For further assistance, reach out through any of the channels below.</p>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div className="bg-white rounded-xl border border-gray-100 p-6 hover:shadow-lg transition-shadow">
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-[#006B3F]/8 text-[#006B3F] mb-4">
-                <Phone size={20} />
+          <div className="grid lg:grid-cols-5 gap-8">
+            <div className="lg:col-span-2 space-y-4">
+              <div className="bg-white rounded-xl border border-gray-100 p-6 hover:shadow-lg transition-shadow">
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-[#006B3F]/8 text-[#006B3F] mb-4">
+                  <Phone size={20} />
+                </div>
+                <h3 className="font-bold text-gray-900 text-sm mb-1">Phone</h3>
+                <p className="text-sm text-gray-500">+233 (0) 302 258 250</p>
+                <p className="text-xs text-gray-400 mt-1">Monday – Friday, 8:00 AM – 5:00 PM GMT</p>
               </div>
-              <h3 className="font-bold text-gray-900 text-sm mb-1">Phone</h3>
-              <p className="text-sm text-gray-500">+233 (0) 302 258 250</p>
-              <p className="text-xs text-gray-400 mt-1">Monday – Friday, 8:00 AM – 5:00 PM GMT</p>
+
+              <div className="bg-white rounded-xl border border-gray-100 p-6 hover:shadow-lg transition-shadow">
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-[#C8962E]/8 text-[#C8962E] mb-4">
+                  <Mail size={20} />
+                </div>
+                <h3 className="font-bold text-gray-900 text-sm mb-1">Email</h3>
+                <p className="text-sm text-gray-500">evisa@gis.gov.gh</p>
+                <p className="text-xs text-gray-400 mt-1">Response within 1–2 business days</p>
+              </div>
+
+              <div className="bg-white rounded-xl border border-gray-100 p-6 hover:shadow-lg transition-shadow">
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-[#CE1126]/8 text-[#CE1126] mb-4">
+                  <MapPin size={20} />
+                </div>
+                <h3 className="font-bold text-gray-900 text-sm mb-1">Office</h3>
+                <p className="text-sm text-gray-500">Ghana Immigration Service</p>
+                <p className="text-xs text-gray-400 mt-1">Independence Ave, Accra, Ghana</p>
+              </div>
             </div>
 
-            <div className="bg-white rounded-xl border border-gray-100 p-6 hover:shadow-lg transition-shadow">
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-[#C8962E]/8 text-[#C8962E] mb-4">
-                <Mail size={20} />
-              </div>
-              <h3 className="font-bold text-gray-900 text-sm mb-1">Email</h3>
-              <p className="text-sm text-gray-500">evisa@gis.gov.gh</p>
-              <p className="text-xs text-gray-400 mt-1">Response within 1–2 business days</p>
-            </div>
+            <div className="lg:col-span-3">
+              <div className="bg-white rounded-2xl border border-gray-100 p-6 sm:p-8 shadow-sm h-full">
+                <h3 className="text-xl font-bold text-gray-900 mb-6">Send us a Message</h3>
 
-            <div className="bg-white rounded-xl border border-gray-100 p-6 hover:shadow-lg transition-shadow">
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-[#CE1126]/8 text-[#CE1126] mb-4">
-                <MapPin size={20} />
+                {formStatus === "success" ? (
+                  <div className="flex flex-col items-center justify-center h-full py-12 text-center animate-fade-in">
+                    <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
+                      <CheckCircle2 size={32} className="text-green-600" />
+                    </div>
+                    <h4 className="text-lg font-bold text-gray-900 mb-2">Message Sent Successfully</h4>
+                    <p className="text-gray-500 text-sm max-w-sm">
+                      Thank you for contacting us. Our support team will respond to your inquiry at the email address provided.
+                    </p>
+                  </div>
+                ) : (
+                  <form onSubmit={handleContactSubmit} className="space-y-5">
+                    <div className="grid sm:grid-cols-2 gap-5">
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-1.5">Full Name *</label>
+                        <input
+                          type="text"
+                          required
+                          value={formData.name}
+                          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                          className="w-full px-4 py-3 bg-gray-50 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#006B3F]/20 focus:border-[#006B3F] text-sm transition-all"
+                          placeholder="John Doe"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-1.5">Email Address *</label>
+                        <input
+                          type="email"
+                          required
+                          value={formData.email}
+                          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                          className="w-full px-4 py-3 bg-gray-50 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#006B3F]/20 focus:border-[#006B3F] text-sm transition-all"
+                          placeholder="john@example.com"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-1.5">Application Reference (Optional)</label>
+                      <input
+                        type="text"
+                        value={formData.reference}
+                        onChange={(e) => setFormData({ ...formData, reference: e.target.value })}
+                        className="w-full px-4 py-3 bg-gray-50 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#006B3F]/20 focus:border-[#006B3F] text-sm transition-all"
+                        placeholder="e.g. GH-2026-ABCDE"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-1.5">Your Message *</label>
+                      <textarea
+                        required
+                        rows={4}
+                        value={formData.message}
+                        onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                        className="w-full px-4 py-3 bg-gray-50 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#006B3F]/20 focus:border-[#006B3F] text-sm transition-all resize-none"
+                        placeholder="How can we help you?"
+                      />
+                    </div>
+
+                    <button
+                      type="submit"
+                      disabled={formStatus === "submitting"}
+                      className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-[#006B3F] hover:bg-[#005A34] text-white font-bold px-8 py-3.5 rounded-xl transition-all disabled:opacity-70 disabled:cursor-not-allowed shadow-lg shadow-[#006B3F]/20"
+                    >
+                      {formStatus === "submitting" ? (
+                        <>Processing...</>
+                      ) : (
+                        <>
+                          <Send size={18} />
+                          Send Message
+                        </>
+                      )}
+                    </button>
+                  </form>
+                )}
               </div>
-              <h3 className="font-bold text-gray-900 text-sm mb-1">Office</h3>
-              <p className="text-sm text-gray-500">Ghana Immigration Service</p>
-              <p className="text-xs text-gray-400 mt-1">Independence Ave, Accra, Ghana</p>
             </div>
           </div>
         </div>
