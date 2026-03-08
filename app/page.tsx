@@ -216,7 +216,9 @@ export default function Home() {
 
             <h1 className="animate-fade-in-up delay-100 leading-[1.1] mb-6">
               <span className="block text-5xl sm:text-6xl lg:text-7xl font-extrabold text-white tracking-tight">
-                Apply for a Ghana{" "}
+                Apply for a Ghana
+              </span>
+              <span className="block text-5xl sm:text-6xl lg:text-7xl font-extrabold text-white tracking-tight">
                 <span className="bg-gradient-to-r from-[#C8962E] via-[#D4A94B] to-[#C8962E] bg-clip-text text-transparent">
                   e-Visa
                 </span>{" "}
