@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useAuth } from "@/lib/auth";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
+import { countries } from "@/lib/countries";
 import {
   ArrowRight,
   CheckCircle2,
@@ -15,15 +16,19 @@ import {
   Plane,
   Users,
   ChevronDown,
-  Star,
   MapPin,
   Phone,
   Mail,
   ChevronRight,
   Menu,
   X,
-  HelpCircle,
-  AlertTriangle,
+  Search,
+  UserPlus,
+  Send,
+  Laptop,
+  Lock,
+  MailCheck,
+  ExternalLink,
 } from "lucide-react";
 
 const roleRedirect: Record<string, string> = {
@@ -32,11 +37,6 @@ const roleRedirect: Record<string, string> = {
   mfa_reviewer: "/dashboard/mfa",
   admin: "/dashboard/admin",
 };
-
-const DESTINATIONS = [
-  "Accra", "Cape Coast", "Kumasi", "Tamale", "Elmina",
-  "Kakum", "Mole Park", "Ada Foah", "Volta Region", "Busua Beach",
-];
 
 function useInView(threshold = 0.15) {
   const ref = useRef<HTMLDivElement>(null);
@@ -58,36 +58,56 @@ export default function Home() {
   const { user, isAuthenticated, loading } = useAuth();
   const router = useRouter();
   const [scrolled, setScrolled] = useState(false);
-  const [destIndex, setDestIndex] = useState(0);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [openFaq, setOpenFaq] = useState<number | null>(null);
 
-  const howItWorks = useInView();
+  // Eligibility checker state
+  const [nationality, setNationality] = useState("");
+  const [eligibilityResult, setEligibilityResult] = useState<"visa_required" | "visa_on_arrival" | "no_visa" | null>(null);
+
+  // Track application state
+  const [trackRef, setTrackRef] = useState("");
+
+  // ECOWAS countries - no visa required
+  const ecowasCountries = [
+    "BJ", "BF", "CV", "CI", "GM", "GN", "GW", "LR", "ML", "NE",
+    "NG", "SN", "SL", "TG"
+  ];
+
+  // Countries eligible for Visa on Arrival
+  const visaOnArrivalCountries = [
+    "US", "GB", "CA", "AU", "NZ", "JP", "KR", "SG", "MY", "ZA",
+    "DE", "FR", "IT", "ES", "NL", "BE", "SE", "NO", "DK", "FI",
+    "AT", "CH", "IE", "PT", "GR", "PL", "CZ", "HU", "RO", "BG"
+  ];
+
+  const checkEligibility = () => {
+    if (!nationality) return;
+    if (ecowasCountries.includes(nationality)) {
+      setEligibilityResult("no_visa");
+    } else if (visaOnArrivalCountries.includes(nationality)) {
+      setEligibilityResult("visa_on_arrival");
+    } else {
+      setEligibilityResult("visa_required");
+    }
+  };
+
+  const resetEligibility = () => {
+    setNationality("");
+    setEligibilityResult(null);
+  };
+
+  // Section refs for animations
   const visaTypes = useInView();
-  const stats = useInView();
-  const faq = useInView();
+  const eligibility = useInView();
+  const appProcess = useInView();
+  const trackSection = useInView();
+  const whyPortal = useInView();
 
-  
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 60);
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setDestIndex((prev) => (prev + 1) % DESTINATIONS.length);
-    }, 2500);
-    return () => clearInterval(interval);
-  }, []);
-
-  const faqs = [
-    { q: "Who needs a visa to enter Ghana?", a: "Citizens of most countries require a visa. ECOWAS nationals are exempt. Check the Visa Requirements page for specific country eligibility." },
-    { q: "How long does the e-Visa process take?", a: "Standard processing takes 3–5 business days. Express processing is available for urgent travel within 24–48 hours." },
-    { q: "What documents do I need?", a: "A valid passport (6+ months validity), passport photo, travel itinerary, proof of accommodation, and yellow fever vaccination certificate." },
-    { q: "Can a visa be extended while in Ghana?", a: "Yes. Visit the nearest Ghana Immigration Service office before the visa expires to apply for an extension." },
-    { q: "Is payment and personal data secure?", a: "Absolutely. All data is encrypted with bank-level SSL security. The portal complies with international data protection standards." },
-  ];
 
   return (
     <div className="min-h-screen bg-white">
@@ -117,7 +137,7 @@ export default function Home() {
                 { label: "Home", href: "/" },
                 { label: "Visa Types", href: "#visa-types" },
                 { label: "Visa Requirements", href: "/visa-requirements" },
-                { label: "Track Application", href: "/track" },
+                { label: "Track Application", href: "#track-application" },
                 { label: "Help", href: "/help" },
               ].map((item) => (
                 <Link
@@ -148,7 +168,7 @@ export default function Home() {
         {mobileMenuOpen && (
           <div className="md:hidden bg-white border-t border-gray-100 shadow-xl animate-slide-down">
             <div className="px-5 py-4 space-y-1">
-              {["Home|/", "Visa Types|#visa-types", "Visa Requirements|/visa-requirements", "Track Application|/track", "Help|/help"].map((item) => {
+              {["Home|/", "Visa Types|#visa-types", "Visa Requirements|/visa-requirements", "Track Application|#track-application", "Help|/help"].map((item) => {
                 const [label, href] = item.split("|");
                 return (
                   <Link key={href} href={href} onClick={() => setMobileMenuOpen(false)} className="block px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-lg">
@@ -195,134 +215,40 @@ export default function Home() {
             </div>
 
             <h1 className="animate-fade-in-up delay-100 leading-[1.1] mb-6">
-              <span className="block text-xl sm:text-2xl font-medium text-white/70 mb-3">The Gateway to Ghana</span>
               <span className="block text-5xl sm:text-6xl lg:text-7xl font-extrabold text-white tracking-tight">
-                e-Visa <span className="bg-gradient-to-r from-[#C8962E] via-[#D4A94B] to-[#C8962E] bg-clip-text text-transparent">Portal</span>
+                Apply for a Ghana{" "}
+                <span className="bg-gradient-to-r from-[#C8962E] via-[#D4A94B] to-[#C8962E] bg-clip-text text-transparent">
+                  e-Visa
+                </span>{" "}
+                Online
               </span>
             </h1>
 
-            <div className="animate-fade-in-up delay-200 flex items-center gap-3 mb-6">
-              <div className="h-px w-10 bg-gradient-to-r from-[#CE1126] via-[#C8962E] to-[#006B3F]" />
-              <p className="text-base sm:text-lg text-white/60">
-                Discover{" "}
-                <span key={destIndex} className="inline-block font-bold text-[#C8962E] transition-all duration-500">
-                  {DESTINATIONS[destIndex]}
-                </span>
-              </p>
-            </div>
-
-            <p className="animate-fade-in-up delay-300 text-base sm:text-lg text-white/50 mb-10 max-w-xl leading-relaxed">
-              Apply for a Ghana electronic visa online. Fast, secure, and fully digital — 
-              processed in as little as 3 business days.
+            <p className="animate-fade-in-up delay-200 text-lg sm:text-xl text-white/60 mb-10 max-w-xl leading-relaxed">
+              Fast, secure and fully digital visa processing.
             </p>
 
-            <div className="animate-fade-in-up delay-400 flex flex-wrap gap-4">
+            <div className="animate-fade-in-up delay-300 flex flex-wrap gap-4">
               <Link
                 href="/register"
                 className="group inline-flex items-center gap-2.5 bg-[#006B3F] hover:bg-[#005A34] text-white font-bold px-8 py-4 rounded-xl transition-all shadow-xl shadow-[#006B3F]/30 text-sm sm:text-base"
               >
-                Start Application
+                Apply Now
                 <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
               </Link>
               <Link
-                href="/track"
+                href="#track-application"
                 className="inline-flex items-center gap-2 border-2 border-white/20 text-white/80 hover:text-white hover:border-white/40 hover:bg-white/5 font-semibold px-7 py-4 rounded-xl transition-all text-sm sm:text-base"
               >
                 Track Application
               </Link>
             </div>
-
           </div>
         </div>
 
         {/* Scroll indicator */}
         <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 animate-float">
           <ChevronDown size={24} className="text-white/30" />
-        </div>
-      </section>
-
-      {/* ═══════════════════ OFFICIAL NOTICE ═══════════════════ */}
-      <section className="bg-[#FFF8E7] border-b border-[#C8962E]/20">
-        <div className="max-w-7xl mx-auto px-5 lg:px-8 py-4">
-          <div className="flex items-start sm:items-center gap-3">
-            <AlertTriangle size={18} className="text-[#C8962E] shrink-0 mt-0.5 sm:mt-0" />
-            <p className="text-sm text-[#8B6914] leading-relaxed">
-              <strong>Official Government Notice:</strong> This is the official electronic visa portal of the Ghana Immigration Service. All visa applications are processed by the Ghana Immigration Service. Beware of fraudulent websites.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* ═══════════════════ HOW IT WORKS ═══════════════════ */}
-      <section id="how-it-works" className="py-24 lg:py-32 bg-white" ref={howItWorks.ref}>
-        <div className="max-w-7xl mx-auto px-5 lg:px-8">
-          <div className={`text-center mb-16 ${howItWorks.inView ? "animate-slide-up" : "opacity-0"}`}>
-            <div className="inline-flex items-center gap-2 bg-[#006B3F]/5 border border-[#006B3F]/10 rounded-full px-4 py-1.5 mb-4">
-              <Clock size={14} className="text-[#006B3F]" />
-              <span className="text-[#006B3F] text-xs font-semibold uppercase tracking-wider">Simple Process</span>
-            </div>
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-4">
-              Get a Visa in <span className="text-[#006B3F]">3 Easy Steps</span>
-            </h2>
-            <p className="text-gray-500 max-w-lg mx-auto">
-              A streamlined digital process makes applying for a Ghana visa quick and hassle-free.
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-8 lg:gap-12">
-            {[
-              {
-                step: "01",
-                icon: <FileText size={28} />,
-                title: "Fill Application",
-                desc: "Complete the online form with personal details, travel plans, and upload required documents.",
-                color: "#CE1126",
-                delay: "delay-100",
-              },
-              {
-                step: "02",
-                icon: <CreditCard size={28} />,
-                title: "Pay & Submit",
-                desc: "Make a secure online payment. The application is instantly submitted for processing.",
-                color: "#C8962E",
-                delay: "delay-300",
-              },
-              {
-                step: "03",
-                icon: <CheckCircle2 size={28} />,
-                title: "Receive e-Visa",
-                desc: "Receive the approved e-Visa via email. Print or save digitally for travel to Ghana.",
-                color: "#006B3F",
-                delay: "delay-500",
-              },
-            ].map((item) => (
-              <div
-                key={item.step}
-                className={`relative group ${howItWorks.inView ? `animate-slide-up ${item.delay}` : "opacity-0"}`}
-              >
-                <div className="bg-white rounded-2xl p-8 border border-gray-100 hover:border-gray-200 hover:shadow-xl transition-all duration-300 h-full">
-                  <div className="flex items-center justify-between mb-6">
-                    <div
-                      className="w-14 h-14 rounded-2xl flex items-center justify-center transition-transform group-hover:scale-110"
-                      style={{ backgroundColor: `${item.color}10`, color: item.color }}
-                    >
-                      {item.icon}
-                    </div>
-                    <span className="text-5xl font-black text-gray-100 group-hover:text-gray-200 transition-colors">
-                      {item.step}
-                    </span>
-                  </div>
-                  <h3 className="text-lg font-bold text-gray-900 mb-2">{item.title}</h3>
-                  <p className="text-sm text-gray-500 leading-relaxed">{item.desc}</p>
-                </div>
-                {item.step !== "03" && (
-                  <div className="hidden md:block absolute top-1/2 -right-6 lg:-right-8 text-gray-200">
-                    <ChevronRight size={24} />
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
         </div>
       </section>
 
@@ -335,7 +261,7 @@ export default function Home() {
               <span className="text-[#C8962E] text-xs font-semibold uppercase tracking-wider">Visa Categories</span>
             </div>
             <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-4">
-              Choose a <span className="text-[#C8962E]">Visa Type</span>
+              Visa <span className="text-[#C8962E]">Types</span>
             </h2>
             <p className="text-gray-500 max-w-lg mx-auto">
               Select the visa category that best matches the purpose of travel to Ghana.
@@ -348,7 +274,6 @@ export default function Home() {
                 icon: <Plane size={24} />,
                 title: "Tourist Visa",
                 duration: "Up to 90 days",
-                price: "$260",
                 desc: "For leisure, sightseeing, and visiting friends or family in Ghana.",
                 color: "#006B3F",
                 popular: true,
@@ -357,7 +282,6 @@ export default function Home() {
                 icon: <Users size={24} />,
                 title: "Business Visa",
                 duration: "Up to 90 days",
-                price: "$260",
                 desc: "For business meetings, conferences, and commercial activities in Ghana.",
                 color: "#C8962E",
                 popular: false,
@@ -381,8 +305,6 @@ export default function Home() {
                 <h3 className="text-base font-bold text-gray-900 mb-1">{visa.title}</h3>
                 <div className="flex items-center gap-2 mb-3">
                   <span className="text-xs font-medium text-gray-400">{visa.duration}</span>
-                  <span className="w-1 h-1 bg-gray-300 rounded-full" />
-                  <span className="text-xs font-bold" style={{ color: visa.color }}>{visa.price}</span>
                 </div>
                 <p className="text-sm text-gray-500 leading-relaxed mb-5">{visa.desc}</p>
                 <Link
@@ -398,60 +320,200 @@ export default function Home() {
         </div>
       </section>
 
-      
-      {/* ═══════════════════ STATS ═══════════════════ */}
-      <section className="py-20 bg-gradient-to-r from-[#006B3F] via-[#007A47] to-[#006B3F] relative overflow-hidden" ref={stats.ref}>
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4wMyI+PHBhdGggZD0iTTM2IDE4YzAtOS45NDEtOC4wNTktMTgtMTgtMThTMCA4LjA1OSAwIDE4czguMDU5IDE4IDE4IDE4IDE4LTguMDU5IDE4LTE4Ii8+PC9nPjwvZz48L3N2Zz4=')] opacity-50" />
-        <div className="max-w-7xl mx-auto px-5 lg:px-8 relative z-10">
-          <div className={`grid grid-cols-2 lg:grid-cols-4 gap-8 ${stats.inView ? "animate-fade-in" : "opacity-0"}`}>
-            {[
-              { value: "50,000+", label: "Visas Issued", icon: <FileText size={20} /> },
-              { value: "190+", label: "Countries Served", icon: <Globe size={20} /> },
-              { value: "98%", label: "Approval Rate", icon: <CheckCircle2 size={20} /> },
-              { value: "3 Days", label: "Avg. Processing", icon: <Clock size={20} /> },
-            ].map((stat, i) => (
-              <div key={stat.label} className={`text-center ${stats.inView ? `animate-count-up delay-${(i + 1) * 200}` : "opacity-0"}`}>
-                <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center mx-auto mb-4 text-white/70">
-                  {stat.icon}
+      {/* ═══════════════════ VISA ELIGIBILITY ═══════════════════ */}
+      <section id="visa-eligibility" className="py-24 lg:py-32 bg-white" ref={eligibility.ref}>
+        <div className="max-w-7xl mx-auto px-5 lg:px-8">
+          <div className={`text-center mb-14 ${eligibility.inView ? "animate-slide-up" : "opacity-0"}`}>
+            <div className="inline-flex items-center gap-2 bg-[#006B3F]/5 border border-[#006B3F]/10 rounded-full px-4 py-1.5 mb-4">
+              <Search size={14} className="text-[#006B3F]" />
+              <span className="text-[#006B3F] text-xs font-semibold uppercase tracking-wider">Eligibility Check</span>
+            </div>
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-4">
+              Visa <span className="text-[#006B3F]">Eligibility</span>
+            </h2>
+            <p className="text-gray-500 max-w-lg mx-auto">
+              Check if you need a visa to travel to Ghana based on your nationality.
+            </p>
+          </div>
+
+          <div className={`max-w-xl mx-auto ${eligibility.inView ? "animate-slide-up delay-200" : "opacity-0"}`}>
+            <div className="bg-white rounded-2xl border border-gray-200 shadow-xl p-6 sm:p-8">
+              {!eligibilityResult ? (
+                <div className="space-y-5">
+                  <div>
+                    <label className="block text-gray-700 text-sm font-semibold mb-2">
+                      Nationality
+                    </label>
+                    <select
+                      value={nationality}
+                      onChange={(e) => setNationality(e.target.value)}
+                      className="w-full px-4 py-3.5 bg-gray-50 rounded-xl text-gray-900 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#006B3F]/20 focus:border-[#006B3F] transition-all text-sm appearance-none cursor-pointer"
+                    >
+                      <option value="">Select Country</option>
+                      {countries.map((c) => (
+                        <option key={c.code} value={c.code}>
+                          {c.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <button
+                    onClick={checkEligibility}
+                    disabled={!nationality}
+                    className="w-full inline-flex items-center justify-center gap-2 bg-[#006B3F] hover:bg-[#005A34] text-white font-bold px-8 py-4 rounded-xl transition-colors disabled:opacity-50 cursor-pointer shadow-lg shadow-[#006B3F]/20"
+                  >
+                    <CheckCircle2 size={18} />
+                    Check Eligibility
+                  </button>
                 </div>
-                <p className="text-3xl sm:text-4xl font-extrabold text-white mb-1">{stat.value}</p>
-                <p className="text-white/60 text-sm font-medium">{stat.label}</p>
-              </div>
-            ))}
+              ) : (
+                <div className="space-y-5">
+                  {/* Result display */}
+                  {eligibilityResult === "no_visa" && (
+                    <div className="p-5 rounded-xl bg-green-50 border-2 border-green-200">
+                      <div className="flex items-start gap-3">
+                        <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
+                          <CheckCircle2 size={20} className="text-green-600" />
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-bold text-green-700 mb-1">No Visa Required</h3>
+                          <p className="text-sm text-green-600/80">
+                            As an ECOWAS citizen, you can enter Ghana without a visa for up to 90 days.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {eligibilityResult === "visa_on_arrival" && (
+                    <div className="p-5 rounded-xl bg-blue-50 border-2 border-blue-200">
+                      <div className="flex items-start gap-3">
+                        <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                          <Globe size={20} className="text-blue-600" />
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-bold text-blue-700 mb-1">Visa on Arrival Available</h3>
+                          <p className="text-sm text-blue-600/80">
+                            You are eligible for visa on arrival. We recommend applying for an e-Visa in advance for a smoother experience.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {eligibilityResult === "visa_required" && (
+                    <div className="p-5 rounded-xl bg-amber-50 border-2 border-amber-200">
+                      <div className="flex items-start gap-3">
+                        <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0">
+                          <FileText size={20} className="text-amber-600" />
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-bold text-amber-700 mb-1">Visa Required</h3>
+                          <p className="text-sm text-amber-600/80">
+                            Visa required for this nationality. You can apply online for a Ghana e-Visa.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="flex gap-3">
+                    <button
+                      onClick={resetEligibility}
+                      className="flex-1 px-5 py-3 border-2 border-gray-200 text-gray-700 font-semibold rounded-xl hover:bg-gray-50 transition-colors text-sm"
+                    >
+                      Check Another Country
+                    </button>
+                    {(eligibilityResult === "visa_required" || eligibilityResult === "visa_on_arrival") && (
+                      <Link
+                        href="/register"
+                        className="flex-1 inline-flex items-center justify-center gap-2 bg-[#006B3F] hover:bg-[#005A34] text-white font-bold px-5 py-3 rounded-xl transition-colors shadow-lg shadow-[#006B3F]/20 text-sm"
+                      >
+                        Apply Now <ArrowRight size={14} />
+                      </Link>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </section>
 
-      {/* ═══════════════════ FAQ ═══════════════════ */}
-      <section id="faq" className="py-24 lg:py-32 bg-[#FAFBFC]" ref={faq.ref}>
-        <div className="max-w-3xl mx-auto px-5 lg:px-8">
-          <div className={`text-center mb-14 ${faq.inView ? "animate-slide-up" : "opacity-0"}`}>
-            <div className="inline-flex items-center gap-2 bg-[#2E6B96]/5 border border-[#2E6B96]/10 rounded-full px-4 py-1.5 mb-4">
-              <FileText size={14} className="text-[#2E6B96]" />
-              <span className="text-[#2E6B96] text-xs font-semibold uppercase tracking-wider">FAQ</span>
+      {/* ═══════════════════ APPLICATION PROCESS (4 Steps) ═══════════════════ */}
+      <section id="how-it-works" className="py-24 lg:py-32 bg-[#FAFBFC]" ref={appProcess.ref}>
+        <div className="max-w-7xl mx-auto px-5 lg:px-8">
+          <div className={`text-center mb-16 ${appProcess.inView ? "animate-slide-up" : "opacity-0"}`}>
+            <div className="inline-flex items-center gap-2 bg-[#006B3F]/5 border border-[#006B3F]/10 rounded-full px-4 py-1.5 mb-4">
+              <Clock size={14} className="text-[#006B3F]" />
+              <span className="text-[#006B3F] text-xs font-semibold uppercase tracking-wider">Simple Process</span>
             </div>
             <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-4">
-              Frequently Asked <span className="text-[#2E6B96]">Questions</span>
+              Application <span className="text-[#006B3F]">Process</span>
             </h2>
-            <p className="text-gray-500">Common questions about the Ghana e-Visa process.</p>
+            <p className="text-gray-500 max-w-lg mx-auto">
+              Follow these four simple steps to apply for your Ghana e-Visa.
+            </p>
           </div>
 
-          <div className={`space-y-3 ${faq.inView ? "animate-slide-up delay-200" : "opacity-0"}`}>
-            {faqs.map((item, i) => (
-              <div key={i} className="bg-white rounded-xl border border-gray-100 overflow-hidden hover:shadow-md transition-shadow">
-                <button
-                  onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                  className="w-full flex items-center justify-between px-6 py-4.5 text-left cursor-pointer"
-                >
-                  <span className="font-semibold text-gray-900 text-sm pr-4">{item.q}</span>
-                  <ChevronDown
-                    size={18}
-                    className={`text-gray-400 shrink-0 transition-transform duration-200 ${openFaq === i ? "rotate-180" : ""}`}
-                  />
-                </button>
-                {openFaq === i && (
-                  <div className="px-6 pb-4 text-sm text-gray-500 leading-relaxed animate-fade-in">
-                    {item.a}
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            {[
+              {
+                step: "01",
+                icon: <Search size={28} />,
+                title: "Check Eligibility",
+                desc: "Verify your visa requirements based on your nationality before starting the application.",
+                color: "#CE1126",
+                delay: "delay-100",
+              },
+              {
+                step: "02",
+                icon: <UserPlus size={28} />,
+                title: "Create Account",
+                desc: "Register on the portal with your email address to begin the application process.",
+                color: "#C8962E",
+                delay: "delay-300",
+              },
+              {
+                step: "03",
+                icon: <FileText size={28} />,
+                title: "Complete Application",
+                desc: "Fill in personal details, travel plans, and upload required documents.",
+                color: "#006B3F",
+                delay: "delay-500",
+              },
+              {
+                step: "04",
+                icon: <CreditCard size={28} />,
+                title: "Pay and Submit",
+                desc: "Make a secure online payment and submit your application for processing.",
+                color: "#2E6B96",
+                delay: "delay-700",
+              },
+            ].map((item) => (
+              <div
+                key={item.step}
+                className={`relative group ${appProcess.inView ? `animate-slide-up ${item.delay}` : "opacity-0"}`}
+              >
+                <div className="bg-white rounded-2xl p-8 border border-gray-100 hover:border-gray-200 hover:shadow-xl transition-all duration-300 h-full">
+                  <div className="flex items-center justify-between mb-6">
+                    <div
+                      className="w-14 h-14 rounded-2xl flex items-center justify-center transition-transform group-hover:scale-110"
+                      style={{ backgroundColor: `${item.color}10`, color: item.color }}
+                    >
+                      {item.icon}
+                    </div>
+                    <span className="text-5xl font-black text-gray-100 group-hover:text-gray-200 transition-colors">
+                      {item.step}
+                    </span>
+                  </div>
+                  <h3 className="text-lg font-bold text-gray-900 mb-2">{item.title}</h3>
+                  <p className="text-sm text-gray-500 leading-relaxed">{item.desc}</p>
+                </div>
+                {item.step !== "04" && (
+                  <div className="hidden lg:block absolute top-1/2 -right-6 text-gray-200">
+                    <ChevronRight size={24} />
                   </div>
                 )}
               </div>
@@ -460,29 +522,107 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ═══════════════════ CTA BANNER ═══════════════════ */}
-      <section className="py-20 bg-white">
-        <div className="max-w-4xl mx-auto px-5 lg:px-8 text-center">
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-4">
-            Ready to Visit <span className="text-[#006B3F]">Ghana</span>?
-          </h2>
-          <p className="text-gray-500 mb-8 max-w-lg mx-auto">
-            Start an e-Visa application today. The entire process is digital, secure, and takes just minutes to complete.
-          </p>
-          <div className="flex flex-wrap items-center justify-center gap-4">
-            <Link
-              href="/register"
-              className="group inline-flex items-center gap-2.5 bg-[#006B3F] hover:bg-[#005A34] text-white font-bold px-8 py-4 rounded-xl shadow-xl shadow-[#006B3F]/20 transition-all text-sm sm:text-base"
-            >
-              Begin Application
-              <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
-            </Link>
-            <Link
-              href="/visa-requirements"
-              className="inline-flex items-center gap-2 border-2 border-gray-200 text-gray-700 hover:border-gray-300 hover:bg-gray-50 font-semibold px-7 py-4 rounded-xl transition-all text-sm sm:text-base"
-            >
-              View Visa Requirements
-            </Link>
+      {/* ═══════════════════ TRACK APPLICATION ═══════════════════ */}
+      <section id="track-application" className="py-24 lg:py-32 bg-white" ref={trackSection.ref}>
+        <div className="max-w-7xl mx-auto px-5 lg:px-8">
+          <div className={`text-center mb-14 ${trackSection.inView ? "animate-slide-up" : "opacity-0"}`}>
+            <div className="inline-flex items-center gap-2 bg-[#C8962E]/8 border border-[#C8962E]/15 rounded-full px-4 py-1.5 mb-4">
+              <Search size={14} className="text-[#C8962E]" />
+              <span className="text-[#C8962E] text-xs font-semibold uppercase tracking-wider">Application Tracking</span>
+            </div>
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-4">
+              Track <span className="text-[#C8962E]">Application</span>
+            </h2>
+            <p className="text-gray-500 max-w-lg mx-auto">
+              Enter your application reference number to check the status of your e-Visa application.
+            </p>
+          </div>
+
+          <div className={`max-w-xl mx-auto ${trackSection.inView ? "animate-slide-up delay-200" : "opacity-0"}`}>
+            <div className="bg-white rounded-2xl border border-gray-200 shadow-xl p-6 sm:p-8">
+              <div className="space-y-5">
+                <div>
+                  <label className="block text-gray-700 text-sm font-semibold mb-2">
+                    Application Reference Number
+                  </label>
+                  <input
+                    type="text"
+                    value={trackRef}
+                    onChange={(e) => setTrackRef(e.target.value.toUpperCase())}
+                    placeholder="GH-EV-20260305-BF71435D"
+                    className="w-full px-4 py-3.5 bg-gray-50 rounded-xl text-gray-900 placeholder:text-gray-400 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#C8962E]/20 focus:border-[#C8962E] transition-all text-sm"
+                  />
+                </div>
+
+                <Link
+                  href={`/track${trackRef ? `?ref=${encodeURIComponent(trackRef)}` : ""}`}
+                  className="w-full inline-flex items-center justify-center gap-2 bg-[#C8962E] hover:bg-[#B08425] text-white font-bold px-8 py-4 rounded-xl transition-colors cursor-pointer shadow-lg shadow-[#C8962E]/20"
+                >
+                  <Search size={18} />
+                  Check Status
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ═══════════════════ WHY USE THE PORTAL ═══════════════════ */}
+      <section id="why-portal" className="py-24 lg:py-32 bg-[#FAFBFC]" ref={whyPortal.ref}>
+        <div className="max-w-7xl mx-auto px-5 lg:px-8">
+          <div className={`text-center mb-16 ${whyPortal.inView ? "animate-slide-up" : "opacity-0"}`}>
+            <div className="inline-flex items-center gap-2 bg-[#2E6B96]/5 border border-[#2E6B96]/10 rounded-full px-4 py-1.5 mb-4">
+              <Shield size={14} className="text-[#2E6B96]" />
+              <span className="text-[#2E6B96] text-xs font-semibold uppercase tracking-wider">Benefits</span>
+            </div>
+            <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-4">
+              Why Use the <span className="text-[#2E6B96]">Portal</span>
+            </h2>
+            <p className="text-gray-500 max-w-lg mx-auto">
+              Experience a seamless, secure, and fully digital visa application process.
+            </p>
+          </div>
+
+          <div className="grid sm:grid-cols-3 gap-8 max-w-4xl mx-auto">
+            {[
+              {
+                icon: <Laptop size={32} />,
+                title: "Online Application",
+                desc: "Apply from anywhere in the world. No embassy visits required — the entire process is digital.",
+                color: "#006B3F",
+                delay: "delay-100",
+              },
+              {
+                icon: <Lock size={32} />,
+                title: "Secure Processing",
+                desc: "Your data is protected with bank-level encryption and complies with international data protection standards.",
+                color: "#C8962E",
+                delay: "delay-300",
+              },
+              {
+                icon: <MailCheck size={32} />,
+                title: "Receive e-Visa by Email",
+                desc: "Once approved, your e-Visa is delivered directly to your email. Print or save digitally for travel.",
+                color: "#2E6B96",
+                delay: "delay-500",
+              },
+            ].map((item) => (
+              <div
+                key={item.title}
+                className={`group ${whyPortal.inView ? `animate-slide-up ${item.delay}` : "opacity-0"}`}
+              >
+                <div className="bg-white rounded-2xl p-8 border border-gray-100 hover:border-gray-200 hover:shadow-xl transition-all duration-300 h-full text-center">
+                  <div
+                    className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform"
+                    style={{ backgroundColor: `${item.color}10`, color: item.color }}
+                  >
+                    {item.icon}
+                  </div>
+                  <h3 className="text-lg font-bold text-gray-900 mb-3">{item.title}</h3>
+                  <p className="text-sm text-gray-500 leading-relaxed">{item.desc}</p>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -513,55 +653,58 @@ export default function Home() {
               </p>
             </div>
 
-            {/* Quick Links */}
+            {/* Visa Information */}
             <div>
-              <h4 className="font-bold text-sm mb-4 text-gray-300 uppercase tracking-wider">Quick Links</h4>
+              <h4 className="font-bold text-sm mb-4 text-gray-300 uppercase tracking-wider">Visa Information</h4>
               <ul className="space-y-2.5">
-                {["Apply for Visa|/register", "Visa Requirements|/visa-requirements", "Track Application|/track", "Help|/help"].map((item) => {
-                  const [label, href] = item.split("|");
-                  return (
-                    <li key={href}>
-                      <Link href={href} className="text-gray-400 hover:text-white text-sm transition-colors">
-                        {label}
-                      </Link>
-                    </li>
-                  );
-                })}
+                {[
+                  { label: "Visa Types", href: "#visa-types" },
+                  { label: "Visa Requirements", href: "/visa-requirements" },
+                ].map((item) => (
+                  <li key={item.href}>
+                    <Link href={item.href} className="text-gray-400 hover:text-white text-sm transition-colors">
+                      {item.label}
+                    </Link>
+                  </li>
+                ))}
               </ul>
             </div>
 
-            {/* Legal */}
+            {/* Support */}
             <div>
-              <h4 className="font-bold text-sm mb-4 text-gray-300 uppercase tracking-wider">Legal</h4>
+              <h4 className="font-bold text-sm mb-4 text-gray-300 uppercase tracking-wider">Support</h4>
               <ul className="space-y-2.5">
-                {["Privacy Policy|/privacy-policy", "Terms of Service|/terms", "Cookie Policy|/cookies", "Accessibility|/accessibility"].map((item, index) => {
-                  const [label, href] = item.split("|");
-                  return (
-                    <li key={`legal-${index}`}>
-                      <Link href={href} className="text-gray-400 hover:text-white text-sm transition-colors">
-                        {label}
-                      </Link>
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
-
-            {/* Contact */}
-            <div>
-              <h4 className="font-bold text-sm mb-4 text-gray-300 uppercase tracking-wider">Contact</h4>
-              <ul className="space-y-3">
-                <li className="flex items-center gap-3">
-                  <Phone size={14} className="text-gray-500" />
+                <li>
+                  <Link href="/help" className="text-gray-400 hover:text-white text-sm transition-colors">
+                    Contact Support
+                  </Link>
+                </li>
+                <li className="flex items-center gap-2">
+                  <Phone size={13} className="text-gray-500" />
                   <span className="text-gray-400 text-sm">+233 (0) 302 258 250</span>
                 </li>
-                <li className="flex items-center gap-3">
-                  <Mail size={14} className="text-gray-500" />
+                <li className="flex items-center gap-2">
+                  <Mail size={13} className="text-gray-500" />
                   <span className="text-gray-400 text-sm">evisa@gis.gov.gh</span>
                 </li>
-                <li className="flex items-start gap-3">
-                  <MapPin size={14} className="text-gray-500 mt-0.5" />
-                  <span className="text-gray-400 text-sm">Ghana Immigration Service<br />Independence Ave, Accra</span>
+              </ul>
+            </div>
+
+            {/* Government Links */}
+            <div>
+              <h4 className="font-bold text-sm mb-4 text-gray-300 uppercase tracking-wider">Government Links</h4>
+              <ul className="space-y-2.5">
+                <li className="flex items-center gap-2">
+                  <ExternalLink size={12} className="text-gray-500" />
+                  <a href="https://gis.gov.gh" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white text-sm transition-colors">
+                    Ghana Immigration Service
+                  </a>
+                </li>
+                <li className="flex items-center gap-2">
+                  <ExternalLink size={12} className="text-gray-500" />
+                  <a href="https://mfa.gov.gh" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white text-sm transition-colors">
+                    Embassy Contacts
+                  </a>
                 </li>
               </ul>
             </div>
