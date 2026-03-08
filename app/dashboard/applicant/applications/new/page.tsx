@@ -674,12 +674,12 @@ function NewApplicationPageInner() {
                         <div>
                           <p className="text-xs text-text-muted uppercase tracking-wider font-medium">Total Amount</p>
                           <p className="text-3xl font-bold text-accent">
-                            ${fees.total > 0 ? fees.total.toFixed(2) : (260 * (form.entry_type === "multiple" ? 1.8 : 1) * (selST ? selST.fee_multiplier || 1 : 1)).toFixed(2)}
+                            ${fees.total > 0 ? fees.total.toFixed(2) : (260 * (form.entry_type === "multiple" ? 1.8 : 1) * (selST ? Number(selST.fee_multiplier) || 1 : 1)).toFixed(2)}
                           </p>
                           <p className="text-xs text-text-muted mt-0.5">
                             {fees.total > 0
                               ? `$${fees.base.toFixed(2)} + $${fees.entry.toFixed(2)} + $${fees.processing.toFixed(2)}`
-                              : `$260 × ${(form.entry_type === "multiple" ? 1.8 : 1).toFixed(1)} × ${(selST ? selST.fee_multiplier || 1 : 1).toFixed(1)}`}
+                              : `$260 × ${(form.entry_type === "multiple" ? 1.8 : 1).toFixed(1)} × ${(selST ? Number(selST.fee_multiplier) || 1 : 1).toFixed(1)}`}
                           </p>
                         </div>
                         <div className="text-right">
