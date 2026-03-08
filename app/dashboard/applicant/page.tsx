@@ -105,53 +105,93 @@ export default function ApplicantDashboard() {
       {isLoading ? (
         <MetricsSkeleton />
       ) : (
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           {/* Drafts */}
-          <div className="card-interactive group" onClick={() => router.push("/dashboard/applicant/applications")}>
+          <div
+            className="card p-6 cursor-pointer transition-all duration-200 hover:shadow-lg hover:border-info/30 group"
+            onClick={() => router.push("/dashboard/applicant/applications")}
+          >
             <div className="flex items-center justify-between mb-4">
-              <div className="w-11 h-11 rounded-xl bg-info/8 flex items-center justify-center group-hover:bg-info/12 transition-colors">
-                <FileText size={20} className="text-info" />
+              <div className="w-12 h-12 rounded-xl bg-info/8 flex items-center justify-center">
+                <FileText size={24} className="text-info" />
               </div>
+              <div className="text-right">
+                <p className="text-2xl font-bold text-text-primary">{draft}</p>
+                <p className="text-xs text-text-muted">Applications</p>
+              </div>
+            </div>
+            <h3 className="font-semibold text-text-primary mb-2">Drafts</h3>
+            <p className="text-sm text-text-secondary mb-4">Applications saved but not yet submitted.</p>
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-text-muted">Click to view details</span>
               <ChevronRight size={16} className="text-text-muted opacity-0 group-hover:opacity-100 transition-opacity" />
             </div>
-            <p className="text-3xl font-bold text-text-primary tracking-tight">{draft}</p>
-            <p className="text-xs text-text-muted font-medium mt-1">Drafts</p>
           </div>
 
           {/* In Progress */}
-          <div className="card-interactive group" onClick={() => router.push("/dashboard/applicant/applications")}>
+          <div
+            className="card p-6 cursor-pointer transition-all duration-200 hover:shadow-lg hover:border-warning/30 group"
+            onClick={() => router.push("/dashboard/applicant/applications")}
+          >
             <div className="flex items-center justify-between mb-4">
-              <div className="w-11 h-11 rounded-xl bg-warning/8 flex items-center justify-center group-hover:bg-warning/12 transition-colors">
-                <Clock size={20} className="text-warning" />
+              <div className="w-12 h-12 rounded-xl bg-warning/8 flex items-center justify-center">
+                <Clock size={24} className="text-warning" />
               </div>
+              <div className="text-right">
+                <p className="text-2xl font-bold text-text-primary">{pending}</p>
+                <p className="text-xs text-text-muted">Applications</p>
+              </div>
+            </div>
+            <h3 className="font-semibold text-text-primary mb-2">In Progress</h3>
+            <p className="text-sm text-text-secondary mb-4">Applications currently being processed.</p>
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-text-muted">Click to view details</span>
               <ChevronRight size={16} className="text-text-muted opacity-0 group-hover:opacity-100 transition-opacity" />
             </div>
-            <p className="text-3xl font-bold text-text-primary tracking-tight">{pending}</p>
-            <p className="text-xs text-text-muted font-medium mt-1">In Progress</p>
           </div>
 
-          {/* Approved */}
-          <div className="card-interactive group" onClick={() => router.push("/dashboard/applicant/applications")}>
+          {/* Approved / Issued */}
+          <div
+            className="card p-6 cursor-pointer transition-all duration-200 hover:shadow-lg hover:border-success/30 group"
+            onClick={() => router.push("/dashboard/applicant/applications")}
+          >
             <div className="flex items-center justify-between mb-4">
-              <div className="w-11 h-11 rounded-xl bg-success/8 flex items-center justify-center group-hover:bg-success/12 transition-colors">
-                <CheckCircle2 size={20} className="text-success" />
+              <div className="w-12 h-12 rounded-xl bg-success/8 flex items-center justify-center">
+                <CheckCircle2 size={24} className="text-success" />
               </div>
+              <div className="text-right">
+                <p className="text-2xl font-bold text-text-primary">{approved}</p>
+                <p className="text-xs text-text-muted">Applications</p>
+              </div>
+            </div>
+            <h3 className="font-semibold text-text-primary mb-2">Approved / Issued</h3>
+            <p className="text-sm text-text-secondary mb-4">Finalized and approved applications.</p>
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-text-muted">Click to view details</span>
               <ChevronRight size={16} className="text-text-muted opacity-0 group-hover:opacity-100 transition-opacity" />
             </div>
-            <p className="text-3xl font-bold text-text-primary tracking-tight">{approved}</p>
-            <p className="text-xs text-text-muted font-medium mt-1">Approved / Issued</p>
           </div>
 
           {/* Needs Action */}
-          <div className="card-interactive group" onClick={() => router.push("/dashboard/applicant/applications")}>
+          <div
+            className="card p-6 cursor-pointer transition-all duration-200 hover:shadow-lg hover:border-danger/30 group"
+            onClick={() => router.push("/dashboard/applicant/applications")}
+          >
             <div className="flex items-center justify-between mb-4">
-              <div className="w-11 h-11 rounded-xl bg-danger/8 flex items-center justify-center group-hover:bg-danger/12 transition-colors">
-                <AlertCircle size={20} className="text-danger" />
+              <div className="w-12 h-12 rounded-xl bg-danger/8 flex items-center justify-center">
+                <AlertCircle size={24} className="text-danger" />
               </div>
+              <div className="text-right">
+                <p className="text-2xl font-bold text-text-primary">{needsAction}</p>
+                <p className="text-xs text-text-muted">Applications</p>
+              </div>
+            </div>
+            <h3 className="font-semibold text-text-primary mb-2">Needs Action</h3>
+            <p className="text-sm text-text-secondary mb-4">Applications requiring your attention.</p>
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-text-muted">Click to view details</span>
               <ChevronRight size={16} className="text-text-muted opacity-0 group-hover:opacity-100 transition-opacity" />
             </div>
-            <p className="text-3xl font-bold text-text-primary tracking-tight">{needsAction}</p>
-            <p className="text-xs text-text-muted font-medium mt-1">Needs Action</p>
           </div>
         </div>
       )}
@@ -161,7 +201,7 @@ export default function ApplicantDashboard() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           {/* Backdrop */}
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowCongrats(false)} />
-          
+
           {/* Modal */}
           <div className="relative bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 animate-scale-in">
             {/* Close Button */}
@@ -171,14 +211,14 @@ export default function ApplicantDashboard() {
             >
               <X size={20} className="text-text-muted" />
             </button>
-            
+
             {/* Content */}
             <div className="p-6 text-center">
               {/* Icon */}
               <div className="w-20 h-20 bg-success rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
                 <CheckCircle2 size={40} className="text-white" />
               </div>
-              
+
               {/* Message */}
               <h3 className="text-2xl font-bold text-text-primary mb-2">
                 🎉 Congratulations!
@@ -186,21 +226,21 @@ export default function ApplicantDashboard() {
               <p className="text-lg text-text-secondary mb-6">
                 Your Recent Application Has Been Approved!
               </p>
-              
+
               {/* Description */}
               <p className="text-text-muted mb-8 leading-relaxed">
                 Your electronic visa is ready. View and download your eVisa to present upon arrival at any port of entry in Ghana.
               </p>
-              
+
               {/* Action Buttons */}
               <div className="flex gap-3 justify-center">
-                <Button 
-                  variant="secondary" 
+                <Button
+                  variant="secondary"
                   onClick={() => setShowCongrats(false)}
                 >
                   Maybe Later
                 </Button>
-                <Button 
+                <Button
                   onClick={() => {
                     router.push("/dashboard/applicant/applications");
                     setShowCongrats(false);
