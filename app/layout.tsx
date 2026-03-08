@@ -7,6 +7,7 @@ import "@fontsource/manrope/700.css";
 import "@fontsource/manrope/800.css";
 import "./globals.css";
 import { Providers } from "./providers";
+import CookieConsent from "@/components/ui/cookie-consent";
 
 const manrope = Manrope({
   subsets: ["latin"],
@@ -28,6 +29,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${manrope.variable} font-sans antialiased`}>
         <Providers>{children}</Providers>
+        <CookieConsent />
       </body>
     </html>
   );
