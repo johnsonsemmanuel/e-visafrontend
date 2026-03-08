@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 @theme inline {
-  --font-sans: "Manrope", var(--font-manrope), system-ui, -apple-system, sans-serif;
-  --font-manrope: "Manrope", var(--font-manrope), system-ui, -apple-system, sans-serif;
+  --font-sans: "Poppins", var(--font-poppins), system-ui, -apple-system, sans-serif;
+  --font-poppins: "Poppins", var(--font-poppins), system-ui, -apple-system, sans-serif;
 
   /* ── Ghana-inspired premium palette ────────────── */
 

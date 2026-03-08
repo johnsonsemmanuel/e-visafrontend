@@ -1,17 +1,18 @@
 import type { Metadata } from "next";
-import { Manrope } from "next/font/google";
-import "@fontsource/manrope/400.css";
-import "@fontsource/manrope/500.css";
-import "@fontsource/manrope/600.css";
-import "@fontsource/manrope/700.css";
-import "@fontsource/manrope/800.css";
+import { Poppins } from "next/font/google";
+import "@fontsource/poppins/400.css";
+import "@fontsource/poppins/500.css";
+import "@fontsource/poppins/600.css";
+import "@fontsource/poppins/700.css";
+import "@fontsource/poppins/800.css";
 import "./globals.css";
 import { Providers } from "./providers";
 import CookieConsent from "@/components/ui/cookie-consent";
 
-const manrope = Manrope({
+const poppins = Poppins({
   subsets: ["latin"],
-  variable: "--font-manrope",
+  weight: ["400", "500", "600", "700", "800"],
+  variable: "--font-poppins",
 });
 
 export const metadata: Metadata = {
@@ -27,7 +28,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${manrope.variable} font-sans antialiased`}>
+      <body className={`${poppins.variable} font-sans antialiased`}>
         <Providers>{children}</Providers>
         <CookieConsent />
       </body>
