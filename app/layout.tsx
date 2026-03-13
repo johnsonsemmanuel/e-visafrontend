@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { Poppins } from "next/font/google";
 import "@fontsource/poppins/400.css";
 import "@fontsource/poppins/500.css";
 import "@fontsource/poppins/600.css";
@@ -8,12 +7,6 @@ import "@fontsource/poppins/800.css";
 import "./globals.css";
 import { Providers } from "./providers";
 import CookieConsent from "@/components/ui/cookie-consent";
-
-const poppins = Poppins({
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800"],
-  variable: "--font-poppins",
-});
 
 export const metadata: Metadata = {
   title: "GH-eVISA — Ghana Electronic Visa Platform",
@@ -28,7 +21,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${poppins.variable} font-sans antialiased`} suppressHydrationWarning>
+      <body className="font-sans antialiased" suppressHydrationWarning>
         <Providers>{children}</Providers>
         <CookieConsent />
       </body>
