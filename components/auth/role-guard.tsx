@@ -11,24 +11,31 @@ interface RoleGuardProps {
   redirectTo?: string;
 }
 
-const loginRoutes: Record<UserRole, string> = {
-  applicant: "/login",
-  APPLICANT: "/login",
-  // GIS roles
-  GIS_REVIEWING_OFFICER: "/login/staff",
-  GIS_APPROVAL_OFFICER: "/login/staff",
-  GIS_ADMIN: "/login/staff",
-  // MFA roles
-  MFA_REVIEWING_OFFICER: "/login/staff",
-  MFA_APPROVAL_OFFICER: "/login/staff",
-  MFA_ADMIN: "/login/staff",
-  // Admin
-  SYSTEM_ADMIN: "/login/admin",
-  // Legacy role names for backward compatibility
-  gis_officer: "/login/staff",
-  mfa_reviewer: "/login/staff",
-  admin: "/login/admin",
-};
+function getLoginRoute(role: UserRole): string {
+  switch (role) {
+    case "APPLICANT":
+    case "applicant":
+      return "/login";
+    case "GIS_REVIEWING_OFFICER":
+    case "GIS_APPROVAL_OFFICER":
+    case "GIS_ADMIN":
+    case "gis_officer":
+    case "MFA_REVIEWING_OFFICER":
+    case "MFA_APPROVAL_OFFICER":
+    case "MFA_ADMIN":
+    case "mfa_reviewer":
+      return "/login/staff";
+    case "SYSTEM_ADMIN":
+    case "admin":
+      return "/login/admin";
+    case "IMMIGRATION_OFFICER":
+      return "/login/border";
+    case "AIRLINE_STAFF":
+      return "/login/staff";
+    default:
+      return "/login";
+  }
+}
 
 export function RoleGuard({ allowedRoles, children, redirectTo }: RoleGuardProps) {
   const { user, isAuthenticated, loading } = useAuth();
@@ -45,8 +52,7 @@ export function RoleGuard({ allowedRoles, children, redirectTo }: RoleGuardProps
 
     if (!allowedRoles.includes(user.role)) {
       // User doesn't have permission - redirect to their correct dashboard or login
-      const correctLogin = loginRoutes[user.role];
-      router.push(correctLogin);
+      router.push(getLoginRoute(user.role));
     }
   }, [user, isAuthenticated, loading, allowedRoles, router, redirectTo]);
 

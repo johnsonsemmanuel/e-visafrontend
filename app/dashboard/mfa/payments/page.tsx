@@ -9,6 +9,7 @@ import { Select } from "@/components/ui/input";
 import { DataTable } from "@/components/ui/data-table";
 import { CheckCircle2, XCircle, Clock, CreditCard } from "lucide-react";
 import type { Application, PaginatedResponse } from "@/lib/types";
+import { isPaymentSuccessful } from "@/lib/utils";
 
 export default function MfaPaymentsPage() {
   const router = useRouter();
@@ -99,7 +100,7 @@ export default function MfaPaymentsPage() {
   ];
 
   const totalCollected = payments
-    .filter((p) => p.status === "completed")
+    .filter((p) => isPaymentSuccessful(p.status))
     .reduce((sum, p) => sum + Number(p.amount), 0);
 
   return (
@@ -127,7 +128,7 @@ export default function MfaPaymentsPage() {
             <div>
               <p className="text-xs text-text-muted">Completed</p>
               <p className="text-xl font-bold text-text-primary">
-                {payments.filter((p) => p.status === "completed").length}
+                {payments.filter((p) => isPaymentSuccessful(p.status)).length}
               </p>
             </div>
           </div>

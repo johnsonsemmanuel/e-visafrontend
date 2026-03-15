@@ -18,6 +18,10 @@ import {
   ChevronUp,
   User,
   HelpCircle,
+  Scan,
+  Plane,
+  MapPin,
+  History,
 } from "lucide-react";
 import type { UserRole } from "@/lib/types";
 
@@ -27,113 +31,108 @@ interface NavItem {
   icon: React.ReactNode;
 }
 
-const navByRole: Record<UserRole, NavItem[]> = {
-  applicant: [
-    { label: "Dashboard", href: "/dashboard/applicant", icon: <LayoutDashboard size={20} /> },
-    { label: "My Applications", href: "/dashboard/applicant/applications", icon: <FileText size={20} /> },
-    { label: "Notifications", href: "/dashboard/applicant/notifications", icon: <Bell size={20} /> },
-    { label: "Help & Support", href: "/dashboard/applicant/support", icon: <HelpCircle size={20} /> },
-    { label: "Profile", href: "/dashboard/applicant/profile", icon: <User size={20} /> },
-  ],
-  APPLICANT: [
-    { label: "Dashboard", href: "/dashboard/applicant", icon: <LayoutDashboard size={20} /> },
-    { label: "My Applications", href: "/dashboard/applicant/applications", icon: <FileText size={20} /> },
-    { label: "Notifications", href: "/dashboard/applicant/notifications", icon: <Bell size={20} /> },
-    { label: "Help & Support", href: "/dashboard/applicant/support", icon: <HelpCircle size={20} /> },
-    { label: "Profile", href: "/dashboard/applicant/profile", icon: <User size={20} /> },
-  ],
-  // GIS roles - all use same navigation
-  GIS_REVIEWING_OFFICER: [
-    { label: "Dashboard", href: "/dashboard/gis", icon: <LayoutDashboard size={20} /> },
-    { label: "Case Queue", href: "/dashboard/gis/cases", icon: <FolderOpen size={20} /> },
-    { label: "Support", href: "/dashboard/gis/support", icon: <HelpCircle size={20} /> },
-    { label: "SLA Alerts", href: "/dashboard/gis/sla-alerts", icon: <AlertTriangle size={20} /> },
-    { label: "Payments", href: "/dashboard/gis/payments", icon: <BarChart3 size={20} /> },
-  ],
-  GIS_APPROVAL_OFFICER: [
-    { label: "Dashboard", href: "/dashboard/gis", icon: <LayoutDashboard size={20} /> },
-    { label: "Case Queue", href: "/dashboard/gis/cases", icon: <FolderOpen size={20} /> },
-    { label: "Support", href: "/dashboard/gis/support", icon: <HelpCircle size={20} /> },
-    { label: "SLA Alerts", href: "/dashboard/gis/sla-alerts", icon: <AlertTriangle size={20} /> },
-    { label: "Payments", href: "/dashboard/gis/payments", icon: <BarChart3 size={20} /> },
-  ],
-  GIS_ADMIN: [
-    { label: "Dashboard", href: "/dashboard/gis", icon: <LayoutDashboard size={20} /> },
-    { label: "Case Queue", href: "/dashboard/gis/cases", icon: <FolderOpen size={20} /> },
-    { label: "Support", href: "/dashboard/gis/support", icon: <HelpCircle size={20} /> },
-    { label: "SLA Alerts", href: "/dashboard/gis/sla-alerts", icon: <AlertTriangle size={20} /> },
-    { label: "Payments", href: "/dashboard/gis/payments", icon: <BarChart3 size={20} /> },
-  ],
-  // MFA roles - all use same navigation
-  MFA_REVIEWING_OFFICER: [
-    { label: "Dashboard", href: "/dashboard/mfa", icon: <LayoutDashboard size={20} /> },
-    { label: "Escalations", href: "/dashboard/mfa/escalations", icon: <AlertTriangle size={20} /> },
-    { label: "Payments", href: "/dashboard/mfa/payments", icon: <BarChart3 size={20} /> },
-  ],
-  MFA_APPROVAL_OFFICER: [
-    { label: "Dashboard", href: "/dashboard/mfa", icon: <LayoutDashboard size={20} /> },
-    { label: "Escalations", href: "/dashboard/mfa/escalations", icon: <AlertTriangle size={20} /> },
-    { label: "Payments", href: "/dashboard/mfa/payments", icon: <BarChart3 size={20} /> },
-  ],
-  MFA_ADMIN: [
-    { label: "Dashboard", href: "/dashboard/mfa", icon: <LayoutDashboard size={20} /> },
-    { label: "Escalations", href: "/dashboard/mfa/escalations", icon: <AlertTriangle size={20} /> },
-    { label: "Payments", href: "/dashboard/mfa/payments", icon: <BarChart3 size={20} /> },
-  ],
-  // Admin
-  SYSTEM_ADMIN: [
-    { label: "Overview", href: "/dashboard/admin", icon: <LayoutDashboard size={20} /> },
-    { label: "Users", href: "/dashboard/admin/users", icon: <Users size={20} /> },
-    { label: "Applications", href: "/dashboard/admin/applications", icon: <FileText size={20} /> },
-    { label: "Payments", href: "/dashboard/admin/payments", icon: <BarChart3 size={20} /> },
-    { label: "Visa Types", href: "/dashboard/admin/visa-types", icon: <FileText size={20} /> },
-    { label: "Tier Rules", href: "/dashboard/admin/tier-rules", icon: <Settings size={20} /> },
-    { label: "Reports", href: "/dashboard/admin/reports", icon: <BarChart3 size={20} /> },
-    { label: "Audit Logs", href: "/dashboard/admin/reports/audit-logs", icon: <FileText size={20} /> },
-  ],
-  // Legacy role names for backward compatibility
-  gis_officer: [
-    { label: "Dashboard", href: "/dashboard/gis", icon: <LayoutDashboard size={20} /> },
-    { label: "Case Queue", href: "/dashboard/gis/cases", icon: <FolderOpen size={20} /> },
-    { label: "Support", href: "/dashboard/gis/support", icon: <HelpCircle size={20} /> },
-    { label: "SLA Alerts", href: "/dashboard/gis/sla-alerts", icon: <AlertTriangle size={20} /> },
-    { label: "Payments", href: "/dashboard/gis/payments", icon: <BarChart3 size={20} /> },
-  ],
-  mfa_reviewer: [
-    { label: "Dashboard", href: "/dashboard/mfa", icon: <LayoutDashboard size={20} /> },
-    { label: "Escalations", href: "/dashboard/mfa/escalations", icon: <AlertTriangle size={20} /> },
-    { label: "Payments", href: "/dashboard/mfa/payments", icon: <BarChart3 size={20} /> },
-  ],
-  admin: [
-    { label: "Overview", href: "/dashboard/admin", icon: <LayoutDashboard size={20} /> },
-    { label: "Users", href: "/dashboard/admin/users", icon: <Users size={20} /> },
-    { label: "Applications", href: "/dashboard/admin/applications", icon: <FileText size={20} /> },
-    { label: "Payments", href: "/dashboard/admin/payments", icon: <BarChart3 size={20} /> },
-    { label: "Visa Types", href: "/dashboard/admin/visa-types", icon: <FileText size={20} /> },
-    { label: "Tier Rules", href: "/dashboard/admin/tier-rules", icon: <Settings size={20} /> },
-    { label: "Reports", href: "/dashboard/admin/reports", icon: <BarChart3 size={20} /> },
-    { label: "Audit Logs", href: "/dashboard/admin/reports/audit-logs", icon: <FileText size={20} /> },
-  ],
-};
+const applicantNav: NavItem[] = [
+  { label: "Dashboard", href: "/dashboard/applicant", icon: <LayoutDashboard size={20} /> },
+  { label: "My Applications", href: "/dashboard/applicant/applications", icon: <FileText size={20} /> },
+  { label: "Notifications", href: "/dashboard/applicant/notifications", icon: <Bell size={20} /> },
+  { label: "Help & Support", href: "/dashboard/applicant/support", icon: <HelpCircle size={20} /> },
+  { label: "Profile", href: "/dashboard/applicant/profile", icon: <User size={20} /> },
+];
 
-const roleLabels: Record<UserRole, string> = {
-  applicant: "Applicant",
-  APPLICANT: "Applicant",
-  // GIS roles
-  GIS_REVIEWING_OFFICER: "GIS Reviewing Officer",
-  GIS_APPROVAL_OFFICER: "GIS Approval Officer",
-  GIS_ADMIN: "GIS Administrator",
-  // MFA roles
-  MFA_REVIEWING_OFFICER: "MFA Reviewing Officer",
-  MFA_APPROVAL_OFFICER: "MFA Approval Officer",
-  MFA_ADMIN: "MFA Administrator",
-  // Admin
-  SYSTEM_ADMIN: "System Administrator",
-  // Legacy role names for backward compatibility
-  gis_officer: "GIS Officer",
-  mfa_reviewer: "MFA Reviewer",
-  admin: "Administrator",
-};
+const gisNav: NavItem[] = [
+  { label: "Dashboard", href: "/dashboard/gis", icon: <LayoutDashboard size={20} /> },
+  { label: "Case Queue", href: "/dashboard/gis/cases", icon: <FolderOpen size={20} /> },
+  { label: "Support", href: "/dashboard/gis/support", icon: <HelpCircle size={20} /> },
+  { label: "SLA Alerts", href: "/dashboard/gis/sla-alerts", icon: <AlertTriangle size={20} /> },
+  { label: "Payments", href: "/dashboard/gis/payments", icon: <BarChart3 size={20} /> },
+];
+
+const mfaNav: NavItem[] = [
+  { label: "Dashboard", href: "/dashboard/mfa", icon: <LayoutDashboard size={20} /> },
+  { label: "Escalations", href: "/dashboard/mfa/escalations", icon: <AlertTriangle size={20} /> },
+  { label: "Payments", href: "/dashboard/mfa/payments", icon: <BarChart3 size={20} /> },
+];
+
+const adminNav: NavItem[] = [
+  { label: "Overview", href: "/dashboard/admin", icon: <LayoutDashboard size={20} /> },
+  { label: "Users", href: "/dashboard/admin/users", icon: <Users size={20} /> },
+  { label: "Applications", href: "/dashboard/admin/applications", icon: <FileText size={20} /> },
+  { label: "Payments", href: "/dashboard/admin/payments", icon: <BarChart3 size={20} /> },
+  { label: "Visa Types", href: "/dashboard/admin/visa-types", icon: <FileText size={20} /> },
+  { label: "Tier Rules", href: "/dashboard/admin/tier-rules", icon: <Settings size={20} /> },
+  { label: "Reports", href: "/dashboard/admin/reports", icon: <BarChart3 size={20} /> },
+  { label: "Audit Logs", href: "/dashboard/admin/reports/audit-logs", icon: <FileText size={20} /> },
+];
+
+const borderNav: NavItem[] = [
+  { label: "Verification", href: "/dashboard/border", icon: <Scan size={20} /> },
+  { label: "Operations", href: "/dashboard/border/operations", icon: <MapPin size={20} /> },
+  { label: "Reports", href: "/dashboard/border/reports", icon: <History size={20} /> },
+];
+
+const airlineNav: NavItem[] = [
+  { label: "Dashboard", href: "/dashboard/airline", icon: <Plane size={20} /> },
+];
+
+function getNavForRole(role: UserRole): NavItem[] {
+  switch (role) {
+    case "APPLICANT":
+    case "applicant":
+      return applicantNav;
+    case "GIS_REVIEWING_OFFICER":
+    case "GIS_APPROVAL_OFFICER":
+    case "GIS_ADMIN":
+    case "gis_officer":
+      return gisNav;
+    case "MFA_REVIEWING_OFFICER":
+    case "MFA_APPROVAL_OFFICER":
+    case "MFA_ADMIN":
+    case "mfa_reviewer":
+      return mfaNav;
+    case "SYSTEM_ADMIN":
+    case "admin":
+      return adminNav;
+    case "IMMIGRATION_OFFICER":
+      return borderNav;
+    case "AIRLINE_STAFF":
+      return airlineNav;
+    default:
+      return [];
+  }
+}
+
+function getRoleLabel(role: UserRole): string {
+  switch (role) {
+    case "APPLICANT":
+    case "applicant":
+      return "Applicant";
+    case "GIS_REVIEWING_OFFICER":
+      return "GIS Reviewing Officer";
+    case "GIS_APPROVAL_OFFICER":
+      return "GIS Approval Officer";
+    case "GIS_ADMIN":
+      return "GIS Administrator";
+    case "gis_officer":
+      return "GIS Officer";
+    case "MFA_REVIEWING_OFFICER":
+      return "MFA Reviewing Officer";
+    case "MFA_APPROVAL_OFFICER":
+      return "MFA Approval Officer";
+    case "MFA_ADMIN":
+      return "MFA Administrator";
+    case "mfa_reviewer":
+      return "MFA Reviewer";
+    case "SYSTEM_ADMIN":
+    case "admin":
+      return "System Administrator";
+    case "IMMIGRATION_OFFICER":
+      return "Immigration Officer";
+    case "AIRLINE_STAFF":
+      return "Airline Staff";
+    default:
+      return "User";
+  }
+}
 
 export function Sidebar() {
   const { user, logout } = useAuth();
@@ -154,13 +153,13 @@ export function Sidebar() {
 
   if (!user) return null;
 
-  const navItems = navByRole[user.role] || [];
+  const navItems = getNavForRole(user.role);
 
   // Check if current path exactly matches or is a subpage (but not sibling routes)
   const isActive = (href: string) => {
     if (pathname === href) return true;
     // For dashboard root pages, only match exact
-    if (href.endsWith("/applicant") || href.endsWith("/gis") || href.endsWith("/mfa") || href.endsWith("/admin")) {
+    if (["/applicant", "/gis", "/mfa", "/admin", "/border", "/airline"].some(s => href.endsWith(s))) {
       return pathname === href;
     }
     // For other pages, match if it's a subpage
@@ -173,7 +172,7 @@ export function Sidebar() {
       <div className="p-5 border-b border-black/20">
         <div className="flex items-center gap-2.5">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          {user.role.startsWith("GIS") || user.role === "gis_officer" ? (
+          {user.role.startsWith("GIS") || user.role === "gis_officer" || user.role === "IMMIGRATION_OFFICER" ? (
             <img src="/gis-logo-new.png" alt="Ghana Immigration Service" width={64} height={64} className="drop-shadow-lg" />
           ) : (
             <img src="/gis-logo.png" alt="Ghana Immigration Service" width={44} height={36} className="drop-shadow-lg" />
@@ -191,7 +190,7 @@ export function Sidebar() {
         <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white/5">
           <Shield size={14} className="text-gold" />
           <span className="text-xs font-medium text-white/70">
-            {roleLabels[user.role]}
+            {getRoleLabel(user.role)}
           </span>
         </div>
       </div>
@@ -225,7 +224,7 @@ export function Sidebar() {
             <div className="p-4 border-b border-border bg-surface">
               <p className="text-sm font-semibold text-text-primary">{user.full_name}</p>
               <p className="text-xs text-text-muted">{user.email}</p>
-              <p className="text-[10px] text-accent font-medium mt-1 uppercase tracking-wider">{roleLabels[user.role]}</p>
+              <p className="text-[10px] text-accent font-medium mt-1 uppercase tracking-wider">{getRoleLabel(user.role)}</p>
             </div>
             <div className="p-2">
               <button className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm text-text-secondary hover:bg-surface hover:text-text-primary transition-colors text-left">

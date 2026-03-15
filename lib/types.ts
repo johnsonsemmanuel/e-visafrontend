@@ -1,7 +1,6 @@
 /* ── User & Auth ─────────────────────────────── */
 
 export type UserRole =
-  | "applicant"
   | "APPLICANT"
   | "GIS_REVIEWING_OFFICER"
   | "GIS_APPROVAL_OFFICER"
@@ -10,7 +9,10 @@ export type UserRole =
   | "MFA_APPROVAL_OFFICER"
   | "MFA_ADMIN"
   | "SYSTEM_ADMIN"
-  // Legacy role names for backward compatibility
+  | "IMMIGRATION_OFFICER"
+  | "AIRLINE_STAFF"
+  // Legacy role names (cached localStorage from older sessions)
+  | "applicant"
   | "gis_officer"
   | "mfa_reviewer"
   | "admin";
@@ -212,7 +214,7 @@ export interface Payment {
   provider_reference: string | null;
   amount: string;
   currency: string;
-  status: "pending" | "completed" | "failed";
+  status: "pending" | "paid" | "completed" | "failed";
   paid_at: string | null;
   created_at: string;
 }

@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/input";
 import { countries } from "@/lib/countries";
 import { Globe, CheckCircle, XCircle, AlertTriangle, ArrowRight, Home } from "lucide-react";
-import axios from "axios";
+import api from "@/lib/api";
+import toast from "react-hot-toast";
 
 export default function CheckEligibilityPage() {
   const router = useRouter();
@@ -19,13 +20,12 @@ export default function CheckEligibilityPage() {
     
     setLoading(true);
     try {
-      const response = await axios.post('/api/eta/check-eligibility', {
+      const response = await api.post('/eta/check-eligibility', {
         nationality: nationality
       });
       setResult(response.data);
-    } catch (error) {
-      console.error('Eligibility check failed:', error);
-      alert('Failed to check eligibility. Please try again.');
+    } catch {
+      toast.error('Failed to check eligibility. Please try again.');
     } finally {
       setLoading(false);
     }

@@ -28,7 +28,7 @@ function PaymentCallbackContent() {
           reference: reference,
         });
 
-        if (res.data.success && res.data.status === "completed") {
+        if (res.data.success && (res.data.status === "paid" || res.data.status === "completed")) {
           setStatus("success");
           setMessage("Payment completed successfully! Your application has been submitted.");
         } else if (res.data.status === "pending") {

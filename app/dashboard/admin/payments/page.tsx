@@ -9,6 +9,7 @@ import { Select } from "@/components/ui/input";
 import { DataTable } from "@/components/ui/data-table";
 import { CheckCircle2, XCircle, Clock, CreditCard, DollarSign, Download } from "lucide-react";
 import type { Payment, PaginatedResponse } from "@/lib/types";
+import { isPaymentSuccessful } from "@/lib/utils";
 
 interface PaymentWithApplication extends Payment {
   application?: {
@@ -110,9 +111,9 @@ export default function AdminPaymentsPage() {
   // Calculate totals from current page data
   const payments = data?.data || [];
   const totalCollected = payments
-    .filter((p) => p.status === "completed")
+    .filter((p) => isPaymentSuccessful(p.status))
     .reduce((sum, p) => sum + Number(p.amount), 0);
-  const completedCount = payments.filter((p) => p.status === "completed").length;
+  const completedCount = payments.filter((p) => isPaymentSuccessful(p.status)).length;
   const pendingCount = payments.filter((p) => p.status === "pending").length;
   const failedCount = payments.filter((p) => p.status === "failed").length;
 

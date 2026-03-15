@@ -10,6 +10,7 @@ import { StatusBadge, SlaIndicator } from "@/components/ui/badge";
 import { Timeline } from "@/components/ui/timeline";
 
 import { CardSkeleton } from "@/components/ui/skeleton";
+import { isPaymentSuccessful } from "@/lib/utils";
 import { DocumentPreview } from "@/components/ui/document-preview";
 import {
   ArrowLeft,
@@ -378,7 +379,7 @@ export default function AdminApplicationDetailPage() {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-sm text-text-muted">Status</span>
-                  <span className={`text-sm font-medium ${application.payment.status === 'completed' ? 'text-success' :
+                  <span className={`text-sm font-medium ${isPaymentSuccessful(application.payment.status) ? 'text-success' :
                     application.payment.status === 'failed' ? 'text-danger' : 'text-warning'
                     }`}>
                     {application.payment.status.charAt(0).toUpperCase() + application.payment.status.slice(1)}

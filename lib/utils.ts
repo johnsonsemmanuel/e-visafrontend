@@ -1,4 +1,12 @@
 /**
+ * Check if a payment status represents a successful payment.
+ * Backend may return "paid" (new) or "completed" (legacy).
+ */
+export function isPaymentSuccessful(status: string | undefined | null): boolean {
+  return status === "paid" || status === "completed";
+}
+
+/**
  * Format phone number to Ghana standard format
  */
 export function formatPhoneNumber(phone: string): string {

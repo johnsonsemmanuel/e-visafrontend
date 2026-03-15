@@ -36,7 +36,7 @@ function PaymentCallbackContent() {
 
       
       // Check for successful payment
-      if (response.data.success && response.data.status === 'completed') {
+      if (response.data.success && (response.data.status === 'paid' || response.data.status === 'completed')) {
         setStatus('success');
         setMessage('Payment completed successfully! Your application is now being processed.');
         setPaymentDetails(response.data.payment);

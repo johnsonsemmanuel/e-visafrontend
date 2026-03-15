@@ -5,7 +5,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { countries } from "@/lib/countries";
 import { Globe, CheckCircle, AlertTriangle, ArrowRight, Home, Upload, User, UserCheck, Plane, Shield } from "lucide-react";
-import axios from "axios";
+import api from "@/lib/api";
+import toast from "react-hot-toast";
 
 interface EtaFormData {
   visa_type_id: number;
@@ -109,7 +110,7 @@ function EtaApplicationPageContent() {
 
   const loadEtaTypes = async () => {
     try {
-      const response = await axios.get(`/api/eta/eligible?nationality=${nationality}`);
+      const response = await api.get(`/eta/eligible?nationality=${nationality}`);
       if (response.data.is_eligible) {
         setEtaTypes(response.data.eta_types);
         if (response.data.eta_types.length > 0) {
@@ -123,7 +124,7 @@ function EtaApplicationPageContent() {
 
   const loadIssuingAuthorities = async () => {
     try {
-      const response = await axios.get(`/api/eta/issuing-authorities?nationality=${nationality}`);
+      const response = await api.get(`/eta/issuing-authorities?nationality=${nationality}`);
       setIssuingAuthorities(response.data.issuing_authorities);
     } catch (error) {
       console.error('Failed to load issuing authorities:', error);
@@ -135,7 +136,7 @@ function EtaApplicationPageContent() {
     if (passportNumber.length < 6) return;
     
     try {
-      const response = await axios.post('/api/eta/validate-passport', {
+      const response = await api.post('/eta/validate-passport', {
         passport_number: passportNumber,
         nationality: formData.nationality
       });
@@ -157,13 +158,12 @@ function EtaApplicationPageContent() {
   const handleSubmit = async () => {
     setLoading(true);
     try {
-      const response = await axios.post('/api/eta/apply', formData);
+      const response = await api.post('/eta/apply', formData);
       
       // Redirect to success page with application details
       router.push(`/apply/eta/success?ref=${response.data.reference_number}`);
     } catch (error: any) {
-      console.error('ETA application failed:', error);
-      alert(error.response?.data?.message || 'Application failed. Please try again.');
+      toast.error(error.response?.data?.message || 'Application failed. Please try again.');
     } finally {
       setLoading(false);
     }

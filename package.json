@@ -9,8 +9,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
-    "test": "jest"
+    "start": "next start"
   },
   "dependencies": {
     "@fontsource/poppins": "^5.2.7",
@@ -30,15 +29,11 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
-    "@testing-library/jest-dom": "^6.6.3",
-    "@testing-library/react": "^16.0.0",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "babel-plugin-react-compiler": "1.0.0",
-    "jest": "^29.7.0",
     "tailwindcss": "^4",
-    "ts-jest": "^29.2.5",
     "typescript": "^5"
   }
 }

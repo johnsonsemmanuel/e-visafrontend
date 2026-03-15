@@ -10,6 +10,7 @@ import { DataTable } from "@/components/ui/data-table";
 import { StatCard } from "@/components/shared/StatCard";
 import { CheckCircle2, XCircle, Clock, CreditCard } from "lucide-react";
 import type { Application, PaginatedResponse } from "@/lib/types";
+import { isPaymentSuccessful } from "@/lib/utils";
 
 export default function GisPaymentsPage() {
   const router = useRouter();
@@ -102,9 +103,9 @@ export default function GisPaymentsPage() {
 
   // Calculate totals
   const totalCollected = payments
-    .filter((p) => p.status === "completed")
+    .filter((p) => isPaymentSuccessful(p.status))
     .reduce((sum, p) => sum + Number(p.amount), 0);
-  const completedCount = payments.filter((p) => p.status === "completed").length;
+  const completedCount = payments.filter((p) => isPaymentSuccessful(p.status)).length;
   const pendingCount = payments.filter((p) => p.status === "pending").length;
 
   return (

@@ -5,7 +5,8 @@ import { useAuth } from "@/lib/auth";
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
 import { countries } from "@/lib/countries";
-import axios from "axios";
+import api from "@/lib/api";
+import toast from "react-hot-toast";
 import {
   ArrowRight,
   CheckCircle2,
@@ -33,10 +34,20 @@ import {
 } from "lucide-react";
 
 const roleRedirect: Record<string, string> = {
+  APPLICANT: "/dashboard/applicant",
   applicant: "/dashboard/applicant",
+  GIS_REVIEWING_OFFICER: "/dashboard/gis",
+  GIS_APPROVAL_OFFICER: "/dashboard/gis",
+  GIS_ADMIN: "/dashboard/gis",
   gis_officer: "/dashboard/gis",
+  MFA_REVIEWING_OFFICER: "/dashboard/mfa",
+  MFA_APPROVAL_OFFICER: "/dashboard/mfa",
+  MFA_ADMIN: "/dashboard/mfa",
   mfa_reviewer: "/dashboard/mfa",
+  SYSTEM_ADMIN: "/dashboard/admin",
   admin: "/dashboard/admin",
+  IMMIGRATION_OFFICER: "/dashboard/border",
+  AIRLINE_STAFF: "/dashboard/airline",
 };
 
 function useInView(threshold = 0.15) {
@@ -74,13 +85,12 @@ export default function Home() {
     
     setEligibilityLoading(true);
     try {
-      const response = await axios.post('/api/eta/check-eligibility', {
+      const response = await api.post('/eta/check-eligibility', {
         nationality: nationality
       });
       setEligibilityResult(response.data);
-    } catch (error) {
-      console.error('Eligibility check failed:', error);
-      alert('Failed to check eligibility. Please try again.');
+    } catch {
+      toast.error('Failed to check eligibility. Please try again.');
     } finally {
       setEligibilityLoading(false);
     }

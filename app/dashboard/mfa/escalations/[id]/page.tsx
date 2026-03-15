@@ -13,6 +13,7 @@ import { Timeline } from "@/components/ui/timeline";
 import { Modal } from "@/components/ui/modal";
 import { Textarea } from "@/components/ui/input";
 import { CardSkeleton } from "@/components/ui/skeleton";
+import { isPaymentSuccessful } from "@/lib/utils";
 import { ReasonCodeSelector } from "@/components/ui/reason-code-selector";
 import { ReasonCodeMultiSelector } from "@/components/ui/reason-code-multi-selector";
 import {
@@ -614,7 +615,7 @@ export default function MfaEscalationDetailPage() {
                 <div>
                   <p className="text-text-muted mb-0.5">Status</p>
                   <span
-                    className={`badge ${application.payment.status === "completed"
+                    className={`badge ${isPaymentSuccessful(application.payment.status)
                       ? "badge-success"
                       : "badge-warning"
                       }`}

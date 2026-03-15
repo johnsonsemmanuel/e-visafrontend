@@ -10,6 +10,7 @@ import { DataTable } from "@/components/ui/data-table";
 import { StatusBadge } from "@/components/ui/badge";
 import { Plus, CheckCircle2, AlertCircle, HelpCircle } from "lucide-react";
 import type { Application, PaginatedResponse } from "@/lib/types";
+import { isPaymentSuccessful } from "@/lib/utils";
 import { Modal } from "@/components/ui/modal";
 
 export default function ApplicationsListPage() {
@@ -81,7 +82,7 @@ export default function ApplicationsListPage() {
       render: (row: Application) => {
         if (!row.payment) return <span className="text-text-muted">—</span>;
         const color =
-          row.payment.status === "completed"
+          isPaymentSuccessful(row.payment.status)
             ? "text-success"
             : row.payment.status === "failed"
               ? "text-danger"

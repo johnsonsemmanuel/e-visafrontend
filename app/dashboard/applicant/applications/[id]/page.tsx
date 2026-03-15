@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { StatusBadge, SlaIndicator } from "@/components/ui/badge";
 import { Timeline } from "@/components/ui/timeline";
 import { CardSkeleton } from "@/components/ui/skeleton";
+import { isPaymentSuccessful } from "@/lib/utils";
 
 import { FileUpload } from "@/components/ui/file-upload";
 import {
@@ -466,7 +467,7 @@ export default function ApplicationDetailPage() {
                 <div className="info-field">
                   <p className="info-label">Status</p>
                   <div className="mt-1">
-                    <span className={`badge ${application.payment.status === "completed" ? "badge-success" : application.payment.status === "failed" ? "badge-danger" : "badge-warning"}`}>
+                    <span className={`badge ${isPaymentSuccessful(application.payment.status) ? "badge-success" : application.payment.status === "failed" ? "badge-danger" : "badge-warning"}`}>
                       {application.payment.status}
                     </span>
                   </div>

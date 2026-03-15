@@ -13,6 +13,7 @@ import { Timeline } from "@/components/ui/timeline";
 import { Modal } from "@/components/ui/modal";
 import { Textarea } from "@/components/ui/input";
 import { CardSkeleton } from "@/components/ui/skeleton";
+import { isPaymentSuccessful } from "@/lib/utils";
 import { ReasonCodeSelector } from "@/components/ui/reason-code-selector";
 import { ReasonCodeMultiSelector } from "@/components/ui/reason-code-multi-selector";
 import { RiskPanel } from "@/components/ui/risk-panel";
@@ -572,7 +573,7 @@ export default function GisCaseDetailPage() {
                         {application.payment.payment_provider}
                       </td>
                       <td className="py-3 px-3">
-                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${application.payment.status === "completed"
+                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${isPaymentSuccessful(application.payment.status)
                           ? "bg-success/10 text-success"
                           : application.payment.status === "failed"
                             ? "bg-danger/10 text-danger"
