@@ -140,7 +140,7 @@ export default function AirlineDashboardPage() {
           {/* Search Type Toggle */}
           <div className="flex gap-2 mb-6">
             <Button
-              variant={searchType === "qr" ? "default" : "secondary"}
+              variant={searchType === "qr" ? "primary" : "secondary"}
               onClick={() => {
                 setSearchType("qr");
                 resetForm();
@@ -151,7 +151,7 @@ export default function AirlineDashboardPage() {
               QR Code
             </Button>
             <Button
-              variant={searchType === "manual" ? "default" : "secondary"}
+              variant={searchType === "manual" ? "primary" : "secondary"}
               onClick={() => {
                 setSearchType("manual");
                 resetForm();

@@ -336,7 +336,7 @@ export default function AdminDashboard() {
               <p className="text-xs text-text-muted">Failed</p>
             </div>
           </div>
-          {payments?.today_revenue && payments.today_revenue > 0 && (
+          {payments?.today_revenue && Number(payments.today_revenue) > 0 && (
             <div className="mt-4 pt-4 border-t border-border">
               <p className="text-sm text-text-muted">Today's Revenue</p>
               <p className="text-xl font-bold text-success">${Number(payments.today_revenue).toFixed(2)}</p>

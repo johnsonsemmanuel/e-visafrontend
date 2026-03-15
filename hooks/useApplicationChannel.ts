@@ -1,6 +1,6 @@
 'use client';
 
-import Pusher from 'pusher-js';
+import Pusher, { type Channel } from 'pusher-js';
 import { useEffect, useRef } from 'react';
 
 export interface ApplicationStatusChangedPayload {
@@ -65,7 +65,7 @@ export function useApplicationChannel(
       ? { onStatusChange: callbacksOrOnStatusChange }
       : callbacksOrOnStatusChange;
   const pusherRef = useRef<Pusher | null>(null);
-  const channelRef = useRef<Pusher.Channel | null>(null);
+  const channelRef = useRef<Channel | null>(null);
   const callbacksRef = useRef(callbacks);
   callbacksRef.current = callbacks;
 

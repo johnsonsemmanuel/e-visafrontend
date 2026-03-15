@@ -305,14 +305,17 @@ export interface AdminOverview {
     submitted: number;
     under_review: number;
     approved: number;
+    issued: number;
     denied: number;
     escalated: number;
   };
   payments: {
-    total_collected: string;
+    total_collected: number | string;
     completed: number;
     failed: number;
     pending: number;
+    today_revenue?: number | string;
+    today_count?: number;
   };
   sla: Record<string, unknown>;
   users: {
