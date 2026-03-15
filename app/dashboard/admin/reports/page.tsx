@@ -2,261 +2,328 @@
 
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import api from "@/lib/api";
 import { DashboardShell } from "@/components/layout/dashboard-shell";
-import { Select } from "@/components/ui/input";
-import { DataTable } from "@/components/ui/data-table";
-import { Badge } from "@/components/ui/badge";
-import { CardSkeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
+import api from "@/lib/api";
 import {
-  BarChart3,
+  Download,
+  FileText,
+  Globe,
+  DollarSign,
   TrendingUp,
-  AlertTriangle,
-  Clock,
-  Shield,
+  Users,
+  MessageSquare,
+  Send,
+  Sparkles,
 } from "lucide-react";
-import type { AuditLog, PaginatedResponse } from "@/lib/types";
 
-interface VolumeEntry {
-  date: string;
-  count: number;
-}
-
-interface SlaStats {
-  stats: Record<string, unknown>;
-  approaching: { reference: string; tier: string; agency: string; hours_remaining: number }[];
-  breached: { reference: string; tier: string; agency: string; breached_by: string }[];
-}
+// Helper function to format date as YYYY-MM-DD
+const formatDate = (date: Date): string => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
 
 export default function AdminReportsPage() {
-  const [auditPage, setAuditPage] = useState(1);
-  const [days, setDays] = useState("30");
-
-  const { data: volumeData, isLoading: volLoading } = useQuery({
-    queryKey: ["admin-volume", days],
-    queryFn: () =>
-      api
-        .get<{ volume: VolumeEntry[] }>("/admin/reports/volume", {
-          params: { days },
-        })
-        .then((r) => r.data),
+  const [dateRange, setDateRange] = useState({
+    start_date: formatDate(new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)),
+    end_date: formatDate(new Date()),
   });
 
-  const { data: slaData, isLoading: slaLoading } = useQuery({
-    queryKey: ["admin-sla"],
+  const [aiQuery, setAiQuery] = useState("");
+  const [aiResponse, setAiResponse] = useState<any>(null);
+  const [aiLoading, setAiLoading] = useState(false);
+
+  // Fetch analytics data
+  const { data: revenueData } = useQuery({
+    queryKey: ["revenue", dateRange],
     queryFn: () =>
-      api.get<SlaStats>("/admin/reports/sla").then((r) => r.data),
+      api.get("/admin/analytics/revenue", { params: dateRange }).then((r) => r.data.data),
   });
 
-  const { data: auditData, isLoading: auditLoading } = useQuery({
-    queryKey: ["admin-audit", auditPage],
+  const { data: visitorsByCountry } = useQuery({
+    queryKey: ["visitors-by-country", dateRange],
     queryFn: () =>
-      api
-        .get<PaginatedResponse<AuditLog>>("/admin/reports/audit-logs", {
-          params: { page: auditPage },
-        })
-        .then((r) => r.data),
+      api.get("/admin/analytics/visitors/by-country", { params: dateRange }).then((r) => r.data.data),
   });
 
-  const volume = volumeData?.volume || [];
-  const maxCount = Math.max(...volume.map((v) => v.count), 1);
+  const { data: approvalRates } = useQuery({
+    queryKey: ["approval-rates", dateRange],
+    queryFn: () =>
+      api.get("/admin/analytics/visitors/approval-rates", { params: dateRange }).then((r) => r.data.data),
+  });
+
+  const handleAIQuery = async () => {
+    if (!aiQuery.trim()) return;
+    
+    setAiLoading(true);
+    try {
+      const response = await api.post("/admin/ai-assistant/query", { query: aiQuery });
+      setAiResponse(response.data);
+      setAiQuery(""); // Clear input after successful query
+    } catch (error) {
+      console.error("AI query failed:", error);
+      setAiResponse({
+        success: false,
+        answer: "Failed to process query. Please try again.",
+      });
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
+  const handleExport = async (type: "csv" | "excel") => {
+    try {
+      const response = await api.post(`/admin/analytics/export/${type}`, {
+        report_type: "visitors_by_country",
+        ...dateRange,
+      }, {
+        responseType: "blob",
+      });
+      
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", `evisa_report_${dateRange.start_date}_to_${dateRange.end_date}.${type === "csv" ? "csv" : "xlsx"}`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (error) {
+      console.error("Export failed:", error);
+    }
+  };
 
   return (
     <DashboardShell
-      title="Reports & Analytics"
-      description="Application volumes, SLA compliance, and audit logs"
+      title="Financial & Analytics Reports"
+      description="Comprehensive system analytics and AI-powered insights"
+      actions={
+        <div className="flex items-center gap-2">
+          <Button
+            variant="secondary"
+            size="sm"
+            leftIcon={<Download size={14} />}
+            onClick={() => handleExport("csv")}
+          >
+            Export CSV
+          </Button>
+          <Button
+            variant="secondary"
+            size="sm"
+            leftIcon={<Download size={14} />}
+            onClick={() => handleExport("excel")}
+          >
+            Export Excel
+          </Button>
+        </div>
+      }
     >
-      {/* Application Volume */}
+      {/* Date Range Selector */}
       <div className="card mb-6">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <TrendingUp size={18} className="text-text-muted" />
-            <h2 className="text-lg font-semibold text-text-primary">
-              Application Volume
-            </h2>
+        <div className="flex items-center gap-4">
+          <div>
+            <label className="block text-xs font-medium text-text-muted mb-1">Start Date</label>
+            <input
+              type="date"
+              value={dateRange.start_date}
+              onChange={(e) => setDateRange({ ...dateRange, start_date: e.target.value })}
+              className="px-3 py-2 rounded-lg border border-border text-sm"
+            />
           </div>
-          <div className="w-32">
-            <Select
-              value={days}
-              onChange={(e) => setDays(e.target.value)}
-              options={[
-                { value: "7", label: "7 days" },
-                { value: "14", label: "14 days" },
-                { value: "30", label: "30 days" },
-                { value: "90", label: "90 days" },
-              ]}
+          <div>
+            <label className="block text-xs font-medium text-text-muted mb-1">End Date</label>
+            <input
+              type="date"
+              value={dateRange.end_date}
+              onChange={(e) => setDateRange({ ...dateRange, end_date: e.target.value })}
+              className="px-3 py-2 rounded-lg border border-border text-sm"
             />
           </div>
         </div>
+      </div>
 
-        {volLoading ? (
-          <CardSkeleton />
-        ) : volume.length === 0 ? (
-          <p className="text-sm text-text-muted text-center py-8">
-            No application data for the selected period
-          </p>
-        ) : (
-          <div className="space-y-2">
-            {/* Simple bar chart */}
-            <div className="flex items-end gap-1 h-40">
-              {volume.map((v, i) => (
-                <div
-                  key={i}
-                  className="flex-1 flex flex-col items-center justify-end"
-                >
-                  <span className="text-[10px] text-text-muted mb-1">
-                    {v.count}
-                  </span>
-                  <div
-                    className="w-full bg-accent/80 rounded-t min-h-[2px] transition-all"
-                    style={{
-                      height: `${(v.count / maxCount) * 100}%`,
-                    }}
-                  />
+      {/* AI Assistant */}
+      <div className="card mb-6">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-10 h-10 rounded-xl bg-purple-100 flex items-center justify-center">
+            <Sparkles size={20} className="text-purple-600" />
+          </div>
+          <div>
+            <h3 className="font-bold text-text-primary">AI Assistant</h3>
+            <p className="text-xs text-text-muted">Ask questions about your data</p>
+          </div>
+        </div>
+
+        <div className="flex gap-2 mb-4">
+          <input
+            type="text"
+            value={aiQuery}
+            onChange={(e) => setAiQuery(e.target.value)}
+            onKeyPress={(e) => e.key === "Enter" && handleAIQuery()}
+            placeholder="e.g., How many visitors from Nigeria last month?"
+            className="flex-1 px-4 py-2 rounded-lg border border-border text-sm"
+          />
+          <Button
+            onClick={handleAIQuery}
+            loading={aiLoading}
+            leftIcon={<Send size={16} />}
+          >
+            Ask
+          </Button>
+        </div>
+
+        {aiResponse && (
+          <div className="bg-surface rounded-lg p-4 border border-border">
+            <p className="text-sm text-text-primary whitespace-pre-wrap leading-relaxed">
+              {aiResponse.answer}
+            </p>
+            {aiResponse.structured_data && (
+              <div className="mt-3 pt-3 border-t border-border">
+                <p className="text-xs font-medium text-text-muted mb-2">Data:</p>
+                <pre className="text-xs text-text-muted overflow-auto bg-white p-3 rounded-lg max-h-48">
+                  {JSON.stringify(aiResponse.structured_data, null, 2)}
+                </pre>
+              </div>
+            )}
+            {aiResponse.suggestions && aiResponse.suggestions.length > 0 && (
+              <div className="mt-3 pt-3 border-t border-border">
+                <p className="text-xs font-medium text-text-muted mb-2">Follow-up questions:</p>
+                <div className="flex flex-wrap gap-2">
+                  {aiResponse.suggestions.map((suggestion: string, idx: number) => (
+                    <button
+                      key={idx}
+                      onClick={() => setAiQuery(suggestion)}
+                      className="px-3 py-1.5 bg-white rounded-lg text-xs text-text-secondary hover:text-accent hover:bg-accent/5 border border-border transition-colors"
+                    >
+                      {suggestion}
+                    </button>
+                  ))}
                 </div>
-              ))}
-            </div>
-            <div className="flex justify-between text-[10px] text-text-muted px-1">
-              <span>{volume[0]?.date}</span>
-              <span>{volume[volume.length - 1]?.date}</span>
-            </div>
+              </div>
+            )}
           </div>
         )}
       </div>
 
-      {/* SLA Compliance */}
-      <div className="grid lg:grid-cols-2 gap-6 mb-6">
-        {/* Approaching Breach */}
-        <div className="card">
-          <div className="flex items-center gap-2 mb-4">
-            <Clock size={18} className="text-warning" />
-            <h2 className="text-lg font-semibold text-text-primary">
-              Approaching SLA Breach
-            </h2>
+      {/* Financial Report */}
+      <div className="card mb-6">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-10 h-10 rounded-xl bg-success/10 flex items-center justify-center">
+            <DollarSign size={20} className="text-success" />
           </div>
-          {slaLoading ? (
-            <CardSkeleton />
-          ) : (slaData?.approaching?.length ?? 0) === 0 ? (
-            <p className="text-sm text-text-muted text-center py-6">
-              No cases approaching breach
-            </p>
-          ) : (
-            <div className="space-y-2 max-h-64 overflow-y-auto">
-              {slaData?.approaching?.map((item, i) => (
-                <div
-                  key={i}
-                  className="flex items-center justify-between p-3 rounded-lg bg-warning/5 border border-warning/20"
-                >
-                  <div>
-                    <p className="text-sm font-medium text-text-primary">
-                      {item.reference}
-                    </p>
-                    <p className="text-xs text-text-muted">
-                      {item.tier?.replace("_", " ")} &middot;{" "}
-                      {item.agency?.toUpperCase()}
-                    </p>
-                  </div>
-                  <Badge variant="warning">
-                    {Math.round(item.hours_remaining)}h left
-                  </Badge>
-                </div>
-              ))}
-            </div>
-          )}
+          <div>
+            <h3 className="font-bold text-text-primary">Financial Report</h3>
+            <p className="text-xs text-text-muted">Revenue and payment analytics</p>
+          </div>
         </div>
 
-        {/* Breached */}
-        <div className="card">
-          <div className="flex items-center gap-2 mb-4">
-            <AlertTriangle size={18} className="text-danger" />
-            <h2 className="text-lg font-semibold text-text-primary">
-              SLA Breached
-            </h2>
+        <div className="grid grid-cols-3 gap-4">
+          <div className="text-center p-4 bg-surface rounded-lg">
+            <p className="text-2xl font-bold text-success">${revenueData?.total?.toFixed(2) || "0.00"}</p>
+            <p className="text-xs text-text-muted mt-1">Total Revenue</p>
           </div>
-          {slaLoading ? (
-            <CardSkeleton />
-          ) : (slaData?.breached?.length ?? 0) === 0 ? (
-            <div className="text-center py-6">
-              <Shield size={24} className="mx-auto text-success mb-2" />
-              <p className="text-sm text-success font-medium">
-                All cases within SLA
-              </p>
-            </div>
-          ) : (
-            <div className="space-y-2 max-h-64 overflow-y-auto">
-              {slaData?.breached?.map((item, i) => (
-                <div
-                  key={i}
-                  className="flex items-center justify-between p-3 rounded-lg bg-danger/5 border border-danger/20"
-                >
+          <div className="text-center p-4 bg-surface rounded-lg">
+            <p className="text-2xl font-bold text-text-primary">{revenueData?.count || 0}</p>
+            <p className="text-xs text-text-muted mt-1">Transactions</p>
+          </div>
+          <div className="text-center p-4 bg-surface rounded-lg">
+            <p className="text-2xl font-bold text-text-primary">${revenueData?.average?.toFixed(2) || "0.00"}</p>
+            <p className="text-xs text-text-muted mt-1">Average Value</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Visitors by Country */}
+      <div className="card mb-6">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-10 h-10 rounded-xl bg-info/10 flex items-center justify-center">
+            <Globe size={20} className="text-info" />
+          </div>
+          <div>
+            <h3 className="font-bold text-text-primary">Visitors by Country</h3>
+            <p className="text-xs text-text-muted">Application volume by nationality</p>
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          {visitorsByCountry && visitorsByCountry.length > 0 ? (
+            visitorsByCountry.slice(0, 10).map((country: any) => (
+              <div key={country.country} className="flex items-center justify-between p-3 bg-surface rounded-lg">
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">🌍</span>
                   <div>
-                    <p className="text-sm font-medium text-text-primary">
-                      {item.reference}
-                    </p>
-                    <p className="text-xs text-text-muted">
-                      {item.tier?.replace("_", " ")} &middot;{" "}
-                      {item.agency?.toUpperCase()}
-                    </p>
+                    <p className="font-medium text-text-primary">{country.country}</p>
+                    <p className="text-xs text-text-muted">{country.count} applications ({country.percentage}%)</p>
                   </div>
-                  <Badge variant="danger">{item.breached_by}</Badge>
                 </div>
-              ))}
+                <div className="text-right">
+                  <p className="font-bold text-text-primary">{country.count}</p>
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="text-center py-8 text-text-muted">
+              <p className="text-sm">No visitor data available for this period</p>
             </div>
           )}
         </div>
       </div>
 
-      {/* Audit Logs */}
+      {/* Approval Rates by Country */}
       <div className="card">
-        <div className="flex items-center gap-2 mb-4">
-          <BarChart3 size={18} className="text-text-muted" />
-          <h2 className="text-lg font-semibold text-text-primary">
-            Audit Logs
-          </h2>
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-10 h-10 rounded-xl bg-warning/10 flex items-center justify-center">
+            <TrendingUp size={20} className="text-warning" />
+          </div>
+          <div>
+            <h3 className="font-bold text-text-primary">Approval & Denial Rates</h3>
+            <p className="text-xs text-text-muted">Success rates by country</p>
+          </div>
         </div>
 
-        <DataTable<AuditLog>
-          columns={[
-            {
-              key: "created_at",
-              header: "Timestamp",
-              render: (row: AuditLog) =>
-                new Date(row.created_at).toLocaleString(),
-            },
-            {
-              key: "user",
-              header: "User",
-              render: (row: AuditLog) =>
-                row.user
-                  ? `${row.user.first_name} ${row.user.last_name}`
-                  : "System",
-            },
-            {
-              key: "role",
-              header: "Role",
-              render: (row: AuditLog) => (
-                <span className="text-sm capitalize">
-                  {row.user?.role?.replace(/_/g, " ") || "—"}
-                </span>
-              ),
-            },
-            {
-              key: "action",
-              header: "Action",
-              render: (row: AuditLog) => (
-                <span className="text-sm text-text-primary">
-                  {row.action}
-                </span>
-              ),
-            },
-          ]}
-          data={auditData?.data || []}
-          currentPage={auditData?.current_page}
-          lastPage={auditData?.last_page}
-          onPageChange={setAuditPage}
-          loading={auditLoading}
-          emptyMessage="No audit log entries found."
-        />
+        <div className="space-y-2">
+          {approvalRates && approvalRates.length > 0 ? (
+            approvalRates.slice(0, 10).map((country: any) => (
+              <div key={country.country} className="p-3 bg-surface rounded-lg">
+                <div className="flex items-center justify-between mb-2">
+                  <p className="font-medium text-text-primary">{country.country}</p>
+                  <p className="text-sm text-text-muted">{country.total} total</p>
+                </div>
+                <div className="flex gap-2">
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs text-success">Approved</span>
+                      <span className="text-xs font-medium">{country.approval_rate}%</span>
+                    </div>
+                    <div className="h-2 bg-surface-dark rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-success"
+                        style={{ width: `${country.approval_rate}%` }}
+                      />
+                    </div>
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs text-danger">Denied</span>
+                      <span className="text-xs font-medium">{country.denial_rate}%</span>
+                    </div>
+                    <div className="h-2 bg-surface-dark rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-danger"
+                        style={{ width: `${country.denial_rate}%` }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="text-center py-8 text-text-muted">
+              <p className="text-sm">No approval rate data available for this period</p>
+            </div>
+          )}
+        </div>
       </div>
     </DashboardShell>
   );

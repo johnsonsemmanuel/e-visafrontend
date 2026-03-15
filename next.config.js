@@ -1,8 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Standard Vercel deployment (not static export)
-  // Vercel will handle server-side rendering automatically
-  
+  output: 'standalone',
+
   // Ensure proper trailing slash handling
   trailingSlash: true,
   

@@ -6,10 +6,10 @@ import { useRouter } from "next/navigation";
 import api from "@/lib/api";
 import { DashboardShell } from "@/components/layout/dashboard-shell";
 import { Button } from "@/components/ui/button";
-import { Select } from "@/components/ui/input";
 import { DataTable } from "@/components/ui/data-table";
 import { StatusBadge } from "@/components/ui/badge";
-import { Search, FileText, Filter, Download } from "lucide-react";
+import { FilterBar, type FilterConfig } from "@/components/shared/FilterBar";
+import { Download } from "lucide-react";
 import type { Application, PaginatedResponse } from "@/lib/types";
 
 export default function AdminApplicationsPage() {
@@ -132,6 +132,40 @@ export default function AdminApplicationsPage() {
     URL.revokeObjectURL(url);
   };
 
+  const filters: FilterConfig[] = [
+    {
+      key: "search",
+      type: "search",
+      placeholder: "Search by reference or name...",
+      value: search,
+      onChange: (value) => {
+        setSearch(value);
+        setPage(1);
+      },
+    },
+    {
+      key: "status",
+      type: "select",
+      placeholder: "All Statuses",
+      value: status,
+      onChange: (value) => {
+        setStatus(value);
+        setPage(1);
+      },
+      options: [
+        { value: "", label: "All Statuses" },
+        { value: "draft", label: "Draft" },
+        { value: "pending_payment", label: "Pending Payment" },
+        { value: "submitted", label: "Submitted" },
+        { value: "under_review", label: "Under Review" },
+        { value: "pending_approval", label: "Pending Approval" },
+        { value: "escalated", label: "Escalated" },
+        { value: "approved", label: "Approved" },
+        { value: "denied", label: "Denied" },
+      ],
+    },
+  ];
+
   return (
     <DashboardShell
       title="All Applications"
@@ -163,45 +197,7 @@ export default function AdminApplicationsPage() {
       </div>
 
       {/* Filters */}
-      <div className="card mb-6">
-        <div className="flex flex-wrap gap-4">
-          <div className="flex-1 min-w-[200px]">
-            <div className="relative">
-              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
-              <input
-                type="text"
-                placeholder="Search by reference or name..."
-                value={search}
-                onChange={(e) => {
-                  setSearch(e.target.value);
-                  setPage(1);
-                }}
-                className="input !pl-9 w-full"
-              />
-            </div>
-          </div>
-          <div className="w-48">
-            <Select
-              value={status}
-              onChange={(e) => {
-                setStatus(e.target.value);
-                setPage(1);
-              }}
-              options={[
-                { value: "", label: "All Statuses" },
-                { value: "draft", label: "Draft" },
-                { value: "pending_payment", label: "Pending Payment" },
-                { value: "submitted", label: "Submitted" },
-                { value: "under_review", label: "Under Review" },
-                { value: "pending_approval", label: "Pending Approval" },
-                { value: "escalated", label: "Escalated" },
-                { value: "approved", label: "Approved" },
-                { value: "denied", label: "Denied" },
-              ]}
-            />
-          </div>
-        </div>
-      </div>
+      <FilterBar filters={filters} />
 
       <DataTable<Application>
         columns={columns}

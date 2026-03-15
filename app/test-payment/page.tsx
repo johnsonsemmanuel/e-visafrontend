@@ -4,6 +4,7 @@ import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { CheckCircle, CreditCard, Loader2 } from "lucide-react";
+import api from "@/lib/api";
 
 function TestPaymentContent() {
   const router = useRouter();
@@ -28,27 +29,19 @@ function TestPaymentContent() {
 
     // Send callback to backend
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('/api/applicant/payment/test-callback', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          reference: reference,
-          status: success ? 'success' : 'failed',
-        }),
+      const response = await api.post('/applicant/payment/test-callback', {
+        reference: reference,
+        status: success ? 'success' : 'failed',
       });
 
-      if (!response.ok) {
-        console.error('Test payment callback failed:', response.status, response.statusText);
+      if (response.status !== 200) {
+        // TODO: wire to error monitoring service
       } else {
-        const result = await response.json();
-        console.log('Test payment callback result:', result);
+        const result = response.data;
+
       }
     } catch (error) {
-      console.error('Failed to send test payment callback:', error);
+      // TODO: wire to error monitoring service
     }
 
     // Redirect to callback URL after a short delay

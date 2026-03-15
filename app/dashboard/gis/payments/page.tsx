@@ -7,6 +7,7 @@ import api from "@/lib/api";
 import { DashboardShell } from "@/components/layout/dashboard-shell";
 import { Select } from "@/components/ui/input";
 import { DataTable } from "@/components/ui/data-table";
+import { StatCard } from "@/components/shared/StatCard";
 import { CheckCircle2, XCircle, Clock, CreditCard } from "lucide-react";
 import type { Application, PaginatedResponse } from "@/lib/types";
 
@@ -113,39 +114,27 @@ export default function GisPaymentsPage() {
     >
       {/* Summary Cards */}
       <div className="grid grid-cols-3 gap-4 mb-6">
-        <div className="card p-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-success/10 rounded-xl flex items-center justify-center">
-              <CreditCard size={20} className="text-success" />
-            </div>
-            <div>
-              <p className="text-xs text-text-muted">Total Collected</p>
-              <p className="text-xl font-bold text-success">${totalCollected.toFixed(2)}</p>
-            </div>
-          </div>
-        </div>
-        <div className="card p-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-info/10 rounded-xl flex items-center justify-center">
-              <CheckCircle2 size={20} className="text-info" />
-            </div>
-            <div>
-              <p className="text-xs text-text-muted">Completed</p>
-              <p className="text-xl font-bold text-text-primary">{completedCount}</p>
-            </div>
-          </div>
-        </div>
-        <div className="card p-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-warning/10 rounded-xl flex items-center justify-center">
-              <Clock size={20} className="text-warning" />
-            </div>
-            <div>
-              <p className="text-xs text-text-muted">Pending</p>
-              <p className="text-xl font-bold text-warning">{pendingCount}</p>
-            </div>
-          </div>
-        </div>
+        <StatCard
+          icon={CreditCard}
+          iconColor="text-success"
+          iconBg="bg-success/10"
+          label="Total Collected"
+          value={`$${totalCollected.toFixed(2)}`}
+        />
+        <StatCard
+          icon={CheckCircle2}
+          iconColor="text-info"
+          iconBg="bg-info/10"
+          label="Completed"
+          value={completedCount}
+        />
+        <StatCard
+          icon={Clock}
+          iconColor="text-warning"
+          iconBg="bg-warning/10"
+          label="Pending"
+          value={pendingCount}
+        />
       </div>
 
       {/* Filter */}

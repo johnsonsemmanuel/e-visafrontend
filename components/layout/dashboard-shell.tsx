@@ -158,7 +158,7 @@ export function DashboardShell({
           </div>
         </div>
       </header>
-      <main className="p-6 lg:p-8 pb-20 lg:pb-8">{children}</main>
+      <main className="p-4 sm:p-6 lg:p-8 pb-20 lg:pb-8 max-w-[1600px] mx-auto">{children}</main>
 
       {/* Mobile Bottom Sheet Menu */}
       {mobileMenuOpen && (

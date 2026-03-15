@@ -5,10 +5,9 @@ import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import api from "@/lib/api";
 import { DashboardShell } from "@/components/layout/dashboard-shell";
-import { Input, Select } from "@/components/ui/input";
 import { DataTable } from "@/components/ui/data-table";
 import { StatusBadge, SlaIndicator } from "@/components/ui/badge";
-import { Search } from "lucide-react";
+import { FilterBar, type FilterConfig } from "@/components/shared/FilterBar";
 import type { Application, PaginatedResponse } from "@/lib/types";
 
 export default function GisCasesPage() {
@@ -100,77 +99,77 @@ export default function GisCasesPage() {
     },
   ];
 
+  const filters: FilterConfig[] = [
+    {
+      key: "search",
+      type: "search",
+      placeholder: "Search by reference...",
+      value: search,
+      onChange: (value) => {
+        setSearch(value);
+        setPage(1);
+      },
+    },
+    {
+      key: "queue",
+      type: "select",
+      placeholder: "All Queues",
+      value: queue,
+      onChange: (value) => {
+        setQueue(value);
+        setPage(1);
+      },
+      options: [
+        { value: "", label: "All Queues" },
+        { value: "review_queue", label: "Review Queue" },
+        { value: "approval_queue", label: "Approval Queue" },
+      ],
+    },
+    {
+      key: "status",
+      type: "select",
+      placeholder: "All Statuses",
+      value: status,
+      onChange: (value) => {
+        setStatus(value);
+        setPage(1);
+      },
+      options: [
+        { value: "", label: "All Statuses" },
+        { value: "submitted", label: "Submitted" },
+        { value: "under_review", label: "Under Review" },
+        { value: "pending_approval", label: "Pending Approval" },
+        { value: "escalated", label: "Escalated" },
+        { value: "additional_info_requested", label: "Info Requested" },
+        { value: "approved", label: "Approved" },
+        { value: "denied", label: "Denied" },
+        { value: "issued", label: "Issued" },
+      ],
+    },
+    {
+      key: "tier",
+      type: "select",
+      placeholder: "All Tiers",
+      value: tier,
+      onChange: (value) => {
+        setTier(value);
+        setPage(1);
+      },
+      options: [
+        { value: "", label: "All Tiers" },
+        { value: "tier_1", label: "Tier 1" },
+        { value: "tier_2", label: "Tier 2" },
+      ],
+    },
+  ];
+
   return (
     <DashboardShell
       title="Case Queue"
       description="Applications assigned to Ghana Immigration Service"
     >
       {/* Filters */}
-      <div className="card mb-6">
-        <div className="grid sm:grid-cols-4 gap-4">
-          <div className="relative">
-            <Search
-              size={16}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted"
-            />
-            <input
-              type="text"
-              placeholder="Search by reference..."
-              value={search}
-              onChange={(e) => {
-                setSearch(e.target.value);
-                setPage(1);
-              }}
-              className="input !pl-9"
-            />
-          </div>
-          <Select
-            value={queue}
-            onChange={(e) => {
-              setQueue(e.target.value);
-              setPage(1);
-            }}
-            placeholder="All Queues"
-            options={[
-              { value: "", label: "All Queues" },
-              { value: "review_queue", label: "Review Queue" },
-              { value: "approval_queue", label: "Approval Queue" },
-            ]}
-          />
-          <Select
-            value={status}
-            onChange={(e) => {
-              setStatus(e.target.value);
-              setPage(1);
-            }}
-            placeholder="All Statuses"
-            options={[
-              { value: "", label: "All Statuses" },
-              { value: "submitted", label: "Submitted" },
-              { value: "under_review", label: "Under Review" },
-              { value: "pending_approval", label: "Pending Approval" },
-              { value: "escalated", label: "Escalated" },
-              { value: "additional_info_requested", label: "Info Requested" },
-              { value: "approved", label: "Approved" },
-              { value: "denied", label: "Denied" },
-              { value: "issued", label: "Issued" },
-            ]}
-          />
-          <Select
-            value={tier}
-            onChange={(e) => {
-              setTier(e.target.value);
-              setPage(1);
-            }}
-            placeholder="All Tiers"
-            options={[
-              { value: "", label: "All Tiers" },
-              { value: "tier_1", label: "Tier 1" },
-              { value: "tier_2", label: "Tier 2" },
-            ]}
-          />
-        </div>
-      </div>
+      <FilterBar filters={filters} />
 
       <DataTable<Application>
         columns={columns}

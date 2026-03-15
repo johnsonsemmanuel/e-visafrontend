@@ -39,7 +39,7 @@ export default function MfaDashboard() {
       setRealtimeMetrics(newMetrics);
     }, []),
     onApplicationStatusChange: useCallback((update: any) => {
-      console.log('MFA Application status changed:', update);
+
     }, []),
   });
 

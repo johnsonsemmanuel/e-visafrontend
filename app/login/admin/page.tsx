@@ -137,20 +137,22 @@ export default function AdminLoginPage() {
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-5">
-            <div className="flex justify-end mb-2">
-              <Button
-                type="button"
-                variant="secondary"
-                size="sm"
-                onClick={() => {
-                  setEmail("admin@ghevisa.gov.gh");
-                  setPassword("password");
-                }}
-                className="text-xs"
-              >
-                Demo: System Admin
-              </Button>
-            </div>
+            {process.env.NODE_ENV === 'development' && (
+              <div className="flex justify-end mb-2">
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => {
+                    setEmail("admin@test.com");
+                    setPassword("password");
+                  }}
+                  className="text-xs"
+                >
+                  Quick Login: System Admin
+                </Button>
+              </div>
+            )}
             <Input
               label="Admin Email"
               type="email"
@@ -202,7 +204,13 @@ export default function AdminLoginPage() {
                 href="/login/staff"
                 className="flex-1 text-center py-2 px-3 rounded-lg bg-teal-50 text-teal-700 text-xs font-medium hover:bg-teal-100 transition-colors"
               >
-                Staff Portal
+                GIS/MFA Staff
+              </Link>
+              <Link
+                href="/login/border"
+                className="flex-1 text-center py-2 px-3 rounded-lg bg-blue-50 text-blue-700 text-xs font-medium hover:bg-blue-100 transition-colors"
+              >
+                Border Control
               </Link>
             </div>
           </div>

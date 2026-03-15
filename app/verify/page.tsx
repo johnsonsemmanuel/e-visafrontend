@@ -17,6 +17,7 @@ import {
   ArrowLeft
 } from "lucide-react";
 import Link from "next/link";
+import api from "@/lib/api";
 
 interface VerificationResult {
   valid: boolean;
@@ -51,18 +52,12 @@ export default function VerifyEVisaPage() {
     setResult(null);
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/verify/evisa`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          code: code.trim(),
-          ...(passportNumber && { passport_number: passportNumber.trim() }),
-        }),
+      const response = await api.post('/verify/evisa', {
+        code: code.trim(),
+        ...(passportNumber && { passport_number: passportNumber.trim() }),
       });
 
-      const data = await response.json();
+      const data = response.data;
       setResult(data);
     } catch {
       setError("Failed to verify eVisa. Please try again.");

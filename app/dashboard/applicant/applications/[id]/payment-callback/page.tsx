@@ -33,35 +33,52 @@ function PaymentCallbackContent() {
       // Verify payment with backend
       const response = await api.post('/applicant/payment/verify', { reference });
       
+
+      
+      // Check for successful payment
       if (response.data.success && response.data.status === 'completed') {
-        // Payment successful - redirect to dashboard
+        setStatus('success');
+        setMessage('Payment completed successfully! Your application is now being processed.');
+        setPaymentDetails(response.data.payment);
+        
         toast.success('Payment completed successfully! Your application is now being processed.', {
           duration: 5000,
           icon: '✅'
         });
-        router.push('/dashboard/applicant');
+        
+        // Redirect after 2 seconds
+        setTimeout(() => {
+          router.push('/dashboard/applicant');
+        }, 2000);
         return;
       }
       
+      // Check for pending verification (bank transfer)
       if (response.data.success && response.data.status === 'pending_verification') {
-        // Payment pending verification - redirect to dashboard
+        setStatus('pending');
+        setMessage('Payment received and is being verified. You will be notified once confirmed.');
+        
         toast.success('Payment received and is being verified. You will be notified once confirmed.', {
           duration: 5000,
           icon: '⏳'
         });
-        router.push('/dashboard/applicant');
+        
+        // Redirect after 2 seconds
+        setTimeout(() => {
+          router.push('/dashboard/applicant');
+        }, 2000);
         return;
       }
       
-      // Payment verification failed
+      // Payment verification failed or payment not found
       setStatus('failed');
-      setMessage(response.data.message || 'Payment verification failed');
-      toast.error(response.data.message || 'Payment failed');
+      setMessage(response.data.message || 'Payment verification failed. Please contact support if you have been charged.');
+      toast.error(response.data.message || 'Payment verification failed');
       
     } catch (error: any) {
-      console.error('Payment verification error:', error);
+      // TODO: wire to error monitoring service
       setStatus('failed');
-      setMessage(error.response?.data?.message || 'Failed to verify payment');
+      setMessage(error.response?.data?.message || 'Failed to verify payment. Please contact support if you have been charged.');
       toast.error('Payment verification failed');
     }
   };

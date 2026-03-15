@@ -14,6 +14,7 @@ import { Modal } from "@/components/ui/modal";
 import { Textarea } from "@/components/ui/input";
 import { CardSkeleton } from "@/components/ui/skeleton";
 import { ReasonCodeSelector } from "@/components/ui/reason-code-selector";
+import { ReasonCodeMultiSelector } from "@/components/ui/reason-code-multi-selector";
 import { RiskPanel } from "@/components/ui/risk-panel";
 import { TrustNetPanel } from "@/components/ui/trustnet-panel";
 import {
@@ -51,6 +52,7 @@ export default function GisCaseDetailPage() {
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(false);
   const [selectedReasonCode, setSelectedReasonCode] = useState<string | null>(null);
+  const [selectedDenialReasonCodes, setSelectedDenialReasonCodes] = useState<string[]>([]);
   const [reasonCodes, setReasonCodes] = useState<ReasonCode[]>([]);
   const [previewDoc, setPreviewDoc] = useState<{
     id: number;
@@ -756,31 +758,31 @@ export default function GisCaseDetailPage() {
         </div>
       </Modal>
 
-      <Modal isOpen={denyOpen} onClose={() => { setDenyOpen(false); setSelectedReasonCode(null); }} title="Deny Application">
+      <Modal isOpen={denyOpen} onClose={() => { setDenyOpen(false); setSelectedDenialReasonCodes([]); }} title="Deny Application">
         <div className="space-y-4">
           <div className="p-4 rounded-xl bg-red-50 border border-red-200">
             <div className="flex items-center gap-3">
               <AlertTriangle size={20} className="text-red-600" />
-              <p className="text-sm text-red-700">This will deny the application. The applicant will be notified with the reason provided.</p>
+              <p className="text-sm text-red-700">This will deny the application. The applicant will be notified with the reasons provided. You can select multiple reasons.</p>
             </div>
           </div>
-          <ReasonCodeSelector
+          <ReasonCodeMultiSelector
             codes={reasonCodes}
-            selectedCode={selectedReasonCode}
-            onSelect={(code) => setSelectedReasonCode(code.code)}
+            selectedCodes={selectedDenialReasonCodes}
+            onSelect={(codes) => setSelectedDenialReasonCodes(codes)}
             actionType="reject"
           />
           <Textarea label="Additional Notes (required)" placeholder="Explain the reason for denial..." value={text} onChange={(e) => setText(e.target.value)} rows={3} />
         </div>
         <div className="flex gap-3 justify-end mt-6">
-          <Button variant="secondary" onClick={() => { setDenyOpen(false); setSelectedReasonCode(null); }}>Cancel</Button>
+          <Button variant="secondary" onClick={() => { setDenyOpen(false); setSelectedDenialReasonCodes([]); }}>Cancel</Button>
           <Button
             variant="danger"
             loading={loading}
-            disabled={!selectedReasonCode || !text.trim()}
+            disabled={selectedDenialReasonCodes.length === 0 || !text.trim()}
             onClick={async () => {
-              if (!selectedReasonCode) {
-                toast.error("Please select a reason code");
+              if (selectedDenialReasonCodes.length === 0) {
+                toast.error("Please select at least one reason code");
                 return;
               }
               if (!text.trim()) {
@@ -791,11 +793,11 @@ export default function GisCaseDetailPage() {
               try {
                 await api.post(`/gis/cases/${id}/deny`, {
                   notes: text,
-                  reason_code: selectedReasonCode
+                  denial_reason_codes: selectedDenialReasonCodes
                 });
                 toast.success("Application denied successfully");
                 setDenyOpen(false);
-                setSelectedReasonCode(null);
+                setSelectedDenialReasonCodes([]);
                 setText("");
                 refresh();
               } catch (err: unknown) {

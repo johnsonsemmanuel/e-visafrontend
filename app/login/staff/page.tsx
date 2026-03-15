@@ -19,13 +19,12 @@ const roleRedirect: Record<string, string> = {
   MFA_APPROVAL_OFFICER: "/dashboard/mfa",
   MFA_ADMIN: "/dashboard/mfa",
   // Border roles
+  IMMIGRATION_OFFICER: "/dashboard/border",
+  AIRLINE_STAFF: "/dashboard/border",
   immigration_officer: "/dashboard/border",
   airline_staff: "/dashboard/border",
   // Admin
   SYSTEM_ADMIN: "/dashboard/admin",
-  // Fallbacks
-  gis_officer: "/dashboard/gis",
-  mfa_reviewer: "/dashboard/mfa",
 };
 
 
@@ -49,6 +48,7 @@ export default function StaffLoginPage() {
       const staffRoles = [
         "GIS_REVIEWING_OFFICER", "GIS_APPROVAL_OFFICER", "GIS_ADMIN",
         "MFA_REVIEWING_OFFICER", "MFA_APPROVAL_OFFICER", "MFA_ADMIN",
+        "IMMIGRATION_OFFICER", "AIRLINE_STAFF",
         "immigration_officer", "airline_staff",
         "SYSTEM_ADMIN"
       ];
@@ -164,56 +164,85 @@ export default function StaffLoginPage() {
 
 
           <form onSubmit={handleSubmit} className="space-y-5">
-            <div className="flex flex-wrap gap-2 justify-end mb-2">
-              <Button
-                type="button"
-                variant="secondary"
-                size="sm"
-                onClick={() => {
-                  setEmail("kmensah@gis.gov.gh");
-                  setPassword("password");
-                }}
-                className="text-xs"
-              >
-                Demo: GIS Reviewer
-              </Button>
-              <Button
-                type="button"
-                variant="secondary"
-                size="sm"
-                onClick={() => {
-                  setEmail("gis.approver@gis.gov.gh");
-                  setPassword("password");
-                }}
-                className="text-xs"
-              >
-                Demo: GIS Approver
-              </Button>
-              <Button
-                type="button"
-                variant="secondary"
-                size="sm"
-                onClick={() => {
-                  setEmail("gis.admin@gis.gov.gh");
-                  setPassword("password");
-                }}
-                className="text-xs"
-              >
-                Demo: GIS Admin
-              </Button>
-              <Button
-                type="button"
-                variant="secondary"
-                size="sm"
-                onClick={() => {
-                  setEmail("aadjei@mfa.gov.gh");
-                  setPassword("password");
-                }}
-                className="text-xs"
-              >
-                Demo: MFA
-              </Button>
-            </div>
+            {process.env.NODE_ENV === 'development' && (
+              <div className="space-y-2 mb-4">
+                <p className="text-xs font-semibold text-text-secondary uppercase tracking-wide">Quick Login - GIS & MFA Staff</p>
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => {
+                      setEmail("gis.reviewer@test.com");
+                      setPassword("password");
+                    }}
+                    className="text-xs"
+                  >
+                    GIS Reviewer
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => {
+                      setEmail("gis.approver@test.com");
+                      setPassword("password");
+                    }}
+                    className="text-xs"
+                  >
+                    GIS Approver
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => {
+                      setEmail("gis.admin@test.com");
+                      setPassword("password");
+                    }}
+                    className="text-xs"
+                  >
+                    GIS Admin
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => {
+                      setEmail("mfa.reviewer@test.com");
+                      setPassword("password");
+                    }}
+                    className="text-xs"
+                  >
+                    MFA Reviewer
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => {
+                      setEmail("mfa.approver@test.com");
+                      setPassword("password");
+                    }}
+                    className="text-xs"
+                  >
+                    MFA Approver
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => {
+                      setEmail("mfa.admin@test.com");
+                      setPassword("password");
+                    }}
+                    className="text-xs"
+                  >
+                    MFA Admin
+                  </Button>
+                </div>
+              </div>
+            )}
             <Input
               label="Staff Email"
               type="email"
@@ -260,6 +289,12 @@ export default function StaffLoginPage() {
                 className="flex-1 text-center py-2 px-3 rounded-lg bg-emerald-50 text-emerald-700 text-xs font-medium hover:bg-emerald-100 transition-colors"
               >
                 Applicant Portal
+              </Link>
+              <Link
+                href="/login/border"
+                className="flex-1 text-center py-2 px-3 rounded-lg bg-blue-50 text-blue-700 text-xs font-medium hover:bg-blue-100 transition-colors"
+              >
+                Border Control
               </Link>
               <Link
                 href="/login/admin"

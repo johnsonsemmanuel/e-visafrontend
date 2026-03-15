@@ -14,6 +14,7 @@ import { Modal } from "@/components/ui/modal";
 import { Textarea } from "@/components/ui/input";
 import { CardSkeleton } from "@/components/ui/skeleton";
 import { ReasonCodeSelector } from "@/components/ui/reason-code-selector";
+import { ReasonCodeMultiSelector } from "@/components/ui/reason-code-multi-selector";
 import {
   ArrowLeft,
   UserCheck,
@@ -49,6 +50,7 @@ export default function MfaEscalationDetailPage() {
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(false);
   const [selectedReasonCode, setSelectedReasonCode] = useState<string | null>(null);
+  const [selectedDenialReasonCodes, setSelectedDenialReasonCodes] = useState<string[]>([]);
   const [reasonCodes, setReasonCodes] = useState<ReasonCode[]>([]);
   const [previewDoc, setPreviewDoc] = useState<{
     id: number;
@@ -763,20 +765,20 @@ export default function MfaEscalationDetailPage() {
 
       <Modal
         isOpen={denyOpen}
-        onClose={() => { setDenyOpen(false); setSelectedReasonCode(null); }}
+        onClose={() => { setDenyOpen(false); setSelectedDenialReasonCodes([]); }}
         title="Deny Application"
       >
         <div className="space-y-4">
           <div className="p-4 rounded-xl bg-red-50 border border-red-200">
             <div className="flex items-center gap-3">
               <XCircle size={20} className="text-red-600" />
-              <p className="text-sm text-red-700">The applicant will be notified with the reason provided.</p>
+              <p className="text-sm text-red-700">The applicant will be notified with the reasons provided. You can select multiple reasons.</p>
             </div>
           </div>
-          <ReasonCodeSelector
+          <ReasonCodeMultiSelector
             codes={reasonCodes}
-            selectedCode={selectedReasonCode}
-            onSelect={(code) => setSelectedReasonCode(code.code)}
+            selectedCodes={selectedDenialReasonCodes}
+            onSelect={(codes) => setSelectedDenialReasonCodes(codes)}
             actionType="reject"
           />
           <Textarea
@@ -788,16 +790,16 @@ export default function MfaEscalationDetailPage() {
           />
         </div>
         <div className="flex gap-3 justify-end mt-6">
-          <Button variant="secondary" onClick={() => { setDenyOpen(false); setSelectedReasonCode(null); }}>
+          <Button variant="secondary" onClick={() => { setDenyOpen(false); setSelectedDenialReasonCodes([]); }}>
             Cancel
           </Button>
           <Button
             variant="danger"
             loading={loading}
-            disabled={!selectedReasonCode || !text.trim()}
+            disabled={selectedDenialReasonCodes.length === 0 || !text.trim()}
             onClick={async () => {
-              if (!selectedReasonCode) {
-                toast.error("Please select a reason code");
+              if (selectedDenialReasonCodes.length === 0) {
+                toast.error("Please select at least one reason code");
                 return;
               }
               if (!text.trim()) {
@@ -808,11 +810,11 @@ export default function MfaEscalationDetailPage() {
               try {
                 await api.post(`/mfa/escalations/${id}/deny`, {
                   notes: text,
-                  reason_code: selectedReasonCode,
+                  denial_reason_codes: selectedDenialReasonCodes,
                 });
                 toast.success("Application denied");
                 setDenyOpen(false);
-                setSelectedReasonCode(null);
+                setSelectedDenialReasonCodes([]);
                 setText("");
                 refresh();
               } catch {

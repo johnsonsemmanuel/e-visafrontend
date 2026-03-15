@@ -9,6 +9,7 @@ import { DashboardShell } from "@/components/layout/dashboard-shell";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/badge";
 import { MetricsSkeleton } from "@/components/ui/skeleton";
+import { LargeStatCard } from "@/components/shared/StatCard";
 import {
   Plus, FileText, Clock, CheckCircle2, AlertCircle, HelpCircle,
   ArrowRight, Plane, ChevronRight, Inbox, X,
@@ -36,7 +37,7 @@ export default function ApplicantDashboard() {
   ).length;
   const approved = apps.filter((a) => ["approved", "issued"].includes(a.status)).length;
   const needsAction = apps.filter((a) =>
-    ["additional_info_requested", "submitted_awaiting_payment", "pending_payment"].includes(a.status)
+    ["additional_info_requested", "submitted_awaiting_payment", "pending_payment", "denied"].includes(a.status)
   ).length;
 
   // Check if popup should be shown (only once per session)
@@ -127,94 +128,51 @@ export default function ApplicantDashboard() {
       {isLoading ? (
         <MetricsSkeleton />
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {/* Drafts */}
-          <div
-            className="card p-6 cursor-pointer transition-all duration-200 hover:shadow-lg hover:border-info/30 group"
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
+          <LargeStatCard
+            icon={FileText}
+            iconColor="text-info"
+            iconBg="bg-info/8"
+            title="Drafts"
+            value={draft}
+            valueLabel="Applications"
+            description="Applications saved but not yet submitted."
             onClick={() => router.push("/dashboard/applicant/applications")}
-          >
-            <div className="flex items-center justify-between mb-4">
-              <div className="w-12 h-12 rounded-xl bg-info/8 flex items-center justify-center">
-                <FileText size={24} className="text-info" />
-              </div>
-              <div className="text-right">
-                <p className="text-2xl font-bold text-text-primary">{draft}</p>
-                <p className="text-xs text-text-muted">Applications</p>
-              </div>
-            </div>
-            <h3 className="font-semibold text-text-primary mb-2">Drafts</h3>
-            <p className="text-sm text-text-secondary mb-4">Applications saved but not yet submitted.</p>
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-text-muted">Click to view details</span>
-              <ChevronRight size={16} className="text-text-muted opacity-0 group-hover:opacity-100 transition-opacity" />
-            </div>
-          </div>
-
-          {/* In Progress */}
-          <div
-            className="card p-6 cursor-pointer transition-all duration-200 hover:shadow-lg hover:border-warning/30 group"
+            hoverBorderColor="hover:border-info/30"
+          />
+          <LargeStatCard
+            icon={Clock}
+            iconColor="text-warning"
+            iconBg="bg-warning/8"
+            title="In Progress"
+            value={pending}
+            valueLabel="Applications"
+            description="Applications currently being processed."
             onClick={() => router.push("/dashboard/applicant/applications")}
-          >
-            <div className="flex items-center justify-between mb-4">
-              <div className="w-12 h-12 rounded-xl bg-warning/8 flex items-center justify-center">
-                <Clock size={24} className="text-warning" />
-              </div>
-              <div className="text-right">
-                <p className="text-2xl font-bold text-text-primary">{pending}</p>
-                <p className="text-xs text-text-muted">Applications</p>
-              </div>
-            </div>
-            <h3 className="font-semibold text-text-primary mb-2">In Progress</h3>
-            <p className="text-sm text-text-secondary mb-4">Applications currently being processed.</p>
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-text-muted">Click to view details</span>
-              <ChevronRight size={16} className="text-text-muted opacity-0 group-hover:opacity-100 transition-opacity" />
-            </div>
-          </div>
-
-          {/* Approved / Issued */}
-          <div
-            className="card p-6 cursor-pointer transition-all duration-200 hover:shadow-lg hover:border-success/30 group"
+            hoverBorderColor="hover:border-warning/30"
+          />
+          <LargeStatCard
+            icon={CheckCircle2}
+            iconColor="text-success"
+            iconBg="bg-success/8"
+            title="Approved / Issued"
+            value={approved}
+            valueLabel="Applications"
+            description="Finalized and approved applications."
             onClick={() => router.push("/dashboard/applicant/applications")}
-          >
-            <div className="flex items-center justify-between mb-4">
-              <div className="w-12 h-12 rounded-xl bg-success/8 flex items-center justify-center">
-                <CheckCircle2 size={24} className="text-success" />
-              </div>
-              <div className="text-right">
-                <p className="text-2xl font-bold text-text-primary">{approved}</p>
-                <p className="text-xs text-text-muted">Applications</p>
-              </div>
-            </div>
-            <h3 className="font-semibold text-text-primary mb-2">Approved / Issued</h3>
-            <p className="text-sm text-text-secondary mb-4">Finalized and approved applications.</p>
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-text-muted">Click to view details</span>
-              <ChevronRight size={16} className="text-text-muted opacity-0 group-hover:opacity-100 transition-opacity" />
-            </div>
-          </div>
-
-          {/* Needs Action */}
-          <div
-            className="card p-6 cursor-pointer transition-all duration-200 hover:shadow-lg hover:border-danger/30 group"
+            hoverBorderColor="hover:border-success/30"
+          />
+          <LargeStatCard
+            icon={AlertCircle}
+            iconColor="text-danger"
+            iconBg="bg-danger/8"
+            title="Needs Action"
+            value={needsAction}
+            valueLabel="Applications"
+            description="Applications requiring your attention."
             onClick={() => router.push("/dashboard/applicant/applications")}
-          >
-            <div className="flex items-center justify-between mb-4">
-              <div className="w-12 h-12 rounded-xl bg-danger/8 flex items-center justify-center">
-                <AlertCircle size={24} className="text-danger" />
-              </div>
-              <div className="text-right">
-                <p className="text-2xl font-bold text-text-primary">{needsAction}</p>
-                <p className="text-xs text-text-muted">Applications</p>
-              </div>
-            </div>
-            <h3 className="font-semibold text-text-primary mb-2">Needs Action</h3>
-            <p className="text-sm text-text-secondary mb-4">Applications requiring your attention.</p>
-            <div className="flex items-center justify-between">
-              <span className="text-xs text-text-muted">Click to view details</span>
-              <ChevronRight size={16} className="text-text-muted opacity-0 group-hover:opacity-100 transition-opacity" />
-            </div>
-          </div>
+            hoverBorderColor="hover:border-danger/30"
+          />
         </div>
       )}
 
