@@ -70,6 +70,10 @@ function EtaApplicationPageContent() {
   const [currentStep, setCurrentStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [passportValidation, setPassportValidation] = useState<any>(null);
+  const [passportExpiryStatus, setPassportExpiryStatus] = useState<{
+    type: "error" | "warning" | null;
+    message: string;
+  }>({ type: null, message: "" });
   const [issuingAuthorities, setIssuingAuthorities] = useState<string[]>([]);
   const [etaTypes, setEtaTypes] = useState<any[]>([]);
   
@@ -146,12 +150,47 @@ function EtaApplicationPageContent() {
     }
   };
 
+  const validatePassportExpiry = (expiryDate: string) => {
+    if (!expiryDate) {
+      setPassportExpiryStatus({ type: null, message: "" });
+      return;
+    }
+
+    const expiry = new Date(expiryDate);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    if (expiry <= today) {
+      setPassportExpiryStatus({
+        type: "error",
+        message: "Your passport has expired. Please renew your passport before applying.",
+      });
+      return;
+    }
+
+    const sixMonthsFromNow = new Date();
+    sixMonthsFromNow.setMonth(sixMonthsFromNow.getMonth() + 6);
+
+    if (expiry < sixMonthsFromNow) {
+      setPassportExpiryStatus({
+        type: "error",
+        message: "Passport must be valid for at least 6 months from today. Please renew your passport before applying.",
+      });
+      return;
+    }
+
+    setPassportExpiryStatus({ type: null, message: "" });
+  };
+
   const handleInputChange = (field: keyof EtaFormData, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     
-    // Real-time passport validation
     if (field === 'passport_number') {
       validatePassportNumber(value);
+    }
+
+    if (field === 'passport_expiry_date') {
+      validatePassportExpiry(value);
     }
   };
 
@@ -378,8 +417,18 @@ function EtaApplicationPageContent() {
                       type="date"
                       value={formData.passport_expiry_date}
                       onChange={(e) => handleInputChange('passport_expiry_date', e.target.value)}
-                      className="w-full px-4 py-3 border border-border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                      className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary ${
+                        passportExpiryStatus.type === 'error' ? 'border-red-500 bg-red-50' : 'border-border'
+                      }`}
                     />
+                    {passportExpiryStatus.type && (
+                      <div className={`mt-2 flex items-start gap-2 text-sm ${
+                        passportExpiryStatus.type === 'error' ? 'text-red-600' : 'text-yellow-600'
+                      }`}>
+                        <AlertTriangle size={16} className="mt-0.5 flex-shrink-0" />
+                        <span>{passportExpiryStatus.message}</span>
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -416,7 +465,14 @@ function EtaApplicationPageContent() {
                 {currentStep < 5 ? (
                   <Button
                     onClick={() => setCurrentStep(currentStep + 1)}
-                    disabled={currentStep === 1 && (!formData.first_name || !formData.last_name || !formData.email)}
+                    disabled={
+                      (currentStep === 1 && (!formData.first_name || !formData.last_name || !formData.email)) ||
+                      (currentStep === 2 && (
+                        !formData.passport_number ||
+                        !formData.passport_expiry_date ||
+                        passportExpiryStatus.type === 'error'
+                      ))
+                    }
                   >
                     Next <ArrowRight size={16} className="ml-2" />
                   </Button>

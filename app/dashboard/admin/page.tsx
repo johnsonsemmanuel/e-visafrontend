@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import api from "@/lib/api";
@@ -26,8 +26,52 @@ import {
   Sparkles,
   Send,
   Globe,
+  Loader2,
 } from "lucide-react";
 import type { AdminOverview } from "@/lib/types";
+
+const COUNTRY_META: Record<string, { name: string; flag: string }> = {
+  US: { name: "United States", flag: "\u{1F1FA}\u{1F1F8}" },
+  GB: { name: "United Kingdom", flag: "\u{1F1EC}\u{1F1E7}" },
+  NG: { name: "Nigeria", flag: "\u{1F1F3}\u{1F1EC}" },
+  DE: { name: "Germany", flag: "\u{1F1E9}\u{1F1EA}" },
+  IN: { name: "India", flag: "\u{1F1EE}\u{1F1F3}" },
+  GH: { name: "Ghana", flag: "\u{1F1EC}\u{1F1ED}" },
+  ZA: { name: "South Africa", flag: "\u{1F1FF}\u{1F1E6}" },
+  FR: { name: "France", flag: "\u{1F1EB}\u{1F1F7}" },
+  CN: { name: "China", flag: "\u{1F1E8}\u{1F1F3}" },
+  CA: { name: "Canada", flag: "\u{1F1E8}\u{1F1E6}" },
+  AU: { name: "Australia", flag: "\u{1F1E6}\u{1F1FA}" },
+  BR: { name: "Brazil", flag: "\u{1F1E7}\u{1F1F7}" },
+  KE: { name: "Kenya", flag: "\u{1F1F0}\u{1F1EA}" },
+  SN: { name: "Senegal", flag: "\u{1F1F8}\u{1F1F3}" },
+  CI: { name: "Ivory Coast", flag: "\u{1F1E8}\u{1F1EE}" },
+  TZ: { name: "Tanzania", flag: "\u{1F1F9}\u{1F1FF}" },
+  MA: { name: "Morocco", flag: "\u{1F1F2}\u{1F1E6}" },
+  EG: { name: "Egypt", flag: "\u{1F1EA}\u{1F1EC}" },
+  JP: { name: "Japan", flag: "\u{1F1EF}\u{1F1F5}" },
+  IT: { name: "Italy", flag: "\u{1F1EE}\u{1F1F9}" },
+  ES: { name: "Spain", flag: "\u{1F1EA}\u{1F1F8}" },
+  NL: { name: "Netherlands", flag: "\u{1F1F3}\u{1F1F1}" },
+  AE: { name: "UAE", flag: "\u{1F1E6}\u{1F1EA}" },
+  SA: { name: "Saudi Arabia", flag: "\u{1F1F8}\u{1F1E6}" },
+  LB: { name: "Lebanon", flag: "\u{1F1F1}\u{1F1E7}" },
+};
+
+function countryName(code: string): string {
+  return COUNTRY_META[code]?.name || code;
+}
+
+function countryFlag(code: string): string {
+  if (COUNTRY_META[code]?.flag) return COUNTRY_META[code].flag;
+  const cp = [...code.toUpperCase()].map(c => 0x1F1E6 - 65 + c.charCodeAt(0));
+  return String.fromCodePoint(...cp);
+}
+
+const VISA_TYPE_COLORS = [
+  "bg-blue-500", "bg-purple-500", "bg-green-500", "bg-orange-500",
+  "bg-pink-500", "bg-cyan-500", "bg-yellow-500", "bg-red-500",
+];
 
 export default function AdminDashboard() {
   const router = useRouter();
@@ -56,11 +100,58 @@ export default function AdminDashboard() {
     refetchInterval: isConnected ? 300000 : 60000, // Reduce polling when connected to WebSocket
   });
 
+  const analyticsDateRange = useMemo(() => {
+    const end = new Date();
+    const start = new Date();
+    start.setMonth(start.getMonth() - 6);
+    return {
+      start_date: start.toISOString().split("T")[0],
+      end_date: end.toISOString().split("T")[0],
+    };
+  }, []);
+
+  const { data: revenueByCountryData, isLoading: revenueByCountryLoading } = useQuery({
+    queryKey: ["admin-revenue-by-country", analyticsDateRange],
+    queryFn: () =>
+      api.get("/admin/analytics/revenue/by-country", { params: analyticsDateRange }).then(r => r.data),
+    staleTime: 300000,
+  });
+
+  const { data: revenueByVisaTypeData, isLoading: revenueByVisaTypeLoading } = useQuery({
+    queryKey: ["admin-revenue-by-visa-type", analyticsDateRange],
+    queryFn: () =>
+      api.get("/admin/analytics/revenue/by-visa-type", { params: analyticsDateRange }).then(r => r.data),
+    staleTime: 300000,
+  });
+
+  const { data: visitorsByCountryData, isLoading: visitorsByCountryLoading } = useQuery({
+    queryKey: ["admin-visitors-by-country", analyticsDateRange],
+    queryFn: () =>
+      api.get("/admin/analytics/visitors/by-country", { params: analyticsDateRange }).then(r => r.data),
+    staleTime: 300000,
+  });
+
+  const { data: approvalRatesData, isLoading: approvalRatesLoading } = useQuery({
+    queryKey: ["admin-approval-rates", analyticsDateRange],
+    queryFn: () =>
+      api.get("/admin/analytics/visitors/approval-rates", { params: analyticsDateRange }).then(r => r.data),
+    staleTime: 300000,
+  });
+
   // Use real-time metrics if available, otherwise fall back to polled data
   const currentData = realtimeMetrics || data;
   const apps = currentData?.applications;
   const payments = currentData?.payments;
   const users_data = currentData?.users;
+
+  const revenueByCountry: Array<{ country: string; count: number; total: number; percentage: number }> =
+    revenueByCountryData?.data ?? [];
+  const revenueByVisaType: Array<{ visa_type: string; count: number; total: number; average: number }> =
+    revenueByVisaTypeData?.data ?? [];
+  const visitorsByCountry: Array<{ country: string; count: number; percentage: number }> =
+    visitorsByCountryData?.data ?? [];
+  const approvalRates: Array<{ country: string; total: number; approved: number; denied: number; approval_rate: number }> =
+    approvalRatesData?.data ?? [];
 
   const greeting = () => {
     const h = new Date().getHours();
@@ -499,24 +590,26 @@ export default function AdminDashboard() {
             </Button>
           </div>
           <div className="space-y-2">
-            {[
-              { country: "United States", flag: "🇺🇸", revenue: 12500, count: 25 },
-              { country: "United Kingdom", flag: "🇬🇧", revenue: 8900, count: 18 },
-              { country: "Nigeria", flag: "🇳🇬", revenue: 6700, count: 34 },
-              { country: "Germany", flag: "🇩🇪", revenue: 5400, count: 12 },
-              { country: "India", flag: "🇮🇳", revenue: 4200, count: 21 },
-            ].map((item) => (
-              <div key={item.country} className="flex items-center justify-between p-3 bg-surface rounded-lg hover:bg-surface-dark transition-colors">
-                <div className="flex items-center gap-3">
-                  <span className="text-2xl">{item.flag}</span>
-                  <div>
-                    <p className="font-medium text-text-primary text-sm">{item.country}</p>
-                    <p className="text-xs text-text-muted">{item.count} applications</p>
-                  </div>
-                </div>
-                <p className="font-bold text-success">${item.revenue.toLocaleString()}</p>
+            {revenueByCountryLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="animate-spin text-text-muted" size={24} />
               </div>
-            ))}
+            ) : revenueByCountry.length === 0 ? (
+              <p className="text-sm text-text-muted text-center py-6">No revenue data yet</p>
+            ) : (
+              revenueByCountry.slice(0, 5).map((item) => (
+                <div key={item.country} className="flex items-center justify-between p-3 bg-surface rounded-lg hover:bg-surface-dark transition-colors">
+                  <div className="flex items-center gap-3">
+                    <span className="text-2xl">{countryFlag(item.country)}</span>
+                    <div>
+                      <p className="font-medium text-text-primary text-sm">{countryName(item.country)}</p>
+                      <p className="text-xs text-text-muted">{item.count} applications</p>
+                    </div>
+                  </div>
+                  <p className="font-bold text-success">${item.total.toLocaleString()}</p>
+                </div>
+              ))
+            )}
           </div>
         </div>
 
@@ -534,35 +627,38 @@ export default function AdminDashboard() {
             </div>
           </div>
           <div className="space-y-3">
-            {[
-              { type: "Tourism", revenue: 25000, count: 50, color: "bg-blue-500" },
-              { type: "Business", revenue: 18000, count: 18, color: "bg-purple-500" },
-              { type: "Student", revenue: 12000, count: 8, color: "bg-green-500" },
-              { type: "Work", revenue: 8000, count: 4, color: "bg-orange-500" },
-            ].map((item) => {
-              const total = 63000;
-              const percentage = ((item.revenue / total) * 100).toFixed(1);
-              return (
-                <div key={item.type}>
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-2">
-                      <div className={`w-3 h-3 rounded-full ${item.color}`}></div>
-                      <span className="text-sm font-medium text-text-primary">{item.type}</span>
+            {revenueByVisaTypeLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="animate-spin text-text-muted" size={24} />
+              </div>
+            ) : revenueByVisaType.length === 0 ? (
+              <p className="text-sm text-text-muted text-center py-6">No visa type data yet</p>
+            ) : (
+              (() => {
+                const grandTotal = revenueByVisaType.reduce((s, i) => s + i.total, 0);
+                return revenueByVisaType.map((item, idx) => {
+                  const percentage = grandTotal > 0 ? ((item.total / grandTotal) * 100).toFixed(1) : "0";
+                  const color = VISA_TYPE_COLORS[idx % VISA_TYPE_COLORS.length];
+                  return (
+                    <div key={item.visa_type}>
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-2">
+                          <div className={`w-3 h-3 rounded-full ${color}`}></div>
+                          <span className="text-sm font-medium text-text-primary">{item.visa_type}</span>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm font-bold text-text-primary">${item.total.toLocaleString()}</p>
+                          <p className="text-xs text-text-muted">{percentage}%</p>
+                        </div>
+                      </div>
+                      <div className="h-2 bg-surface rounded-full overflow-hidden">
+                        <div className={`h-full ${color}`} style={{ width: `${percentage}%` }} />
+                      </div>
                     </div>
-                    <div className="text-right">
-                      <p className="text-sm font-bold text-text-primary">${item.revenue.toLocaleString()}</p>
-                      <p className="text-xs text-text-muted">{percentage}%</p>
-                    </div>
-                  </div>
-                  <div className="h-2 bg-surface rounded-full overflow-hidden">
-                    <div
-                      className={`h-full ${item.color}`}
-                      style={{ width: `${percentage}%` }}
-                    />
-                  </div>
-                </div>
-              );
-            })}
+                  );
+                });
+              })()
+            )}
           </div>
         </div>
       </div>
@@ -593,28 +689,33 @@ export default function AdminDashboard() {
             </Button>
           </div>
           <div className="space-y-2">
-            {[
-              { country: "Nigeria", flag: "🇳🇬", total: 145, approved: 120, denied: 25 },
-              { country: "United States", flag: "🇺🇸", total: 98, approved: 92, denied: 6 },
-              { country: "United Kingdom", flag: "🇬🇧", total: 87, approved: 81, denied: 6 },
-              { country: "India", flag: "🇮🇳", total: 76, approved: 68, denied: 8 },
-              { country: "Germany", flag: "🇩🇪", total: 54, approved: 51, denied: 3 },
-            ].map((item) => (
-              <div key={item.country} className="p-3 bg-surface rounded-lg">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xl">{item.flag}</span>
-                    <span className="font-medium text-text-primary text-sm">{item.country}</span>
-                  </div>
-                  <span className="text-sm font-bold text-text-primary">{item.total}</span>
-                </div>
-                <div className="flex gap-2 text-xs">
-                  <span className="text-success">{item.approved} approved</span>
-                  <span className="text-text-muted">•</span>
-                  <span className="text-danger">{item.denied} denied</span>
-                </div>
+            {visitorsByCountryLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="animate-spin text-text-muted" size={24} />
               </div>
-            ))}
+            ) : visitorsByCountry.length === 0 ? (
+              <p className="text-sm text-text-muted text-center py-6">No visitor data yet</p>
+            ) : (
+              visitorsByCountry.slice(0, 5).map((item) => {
+                const rates = approvalRates.find(r => r.country === item.country);
+                return (
+                  <div key={item.country} className="p-3 bg-surface rounded-lg">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xl">{countryFlag(item.country)}</span>
+                        <span className="font-medium text-text-primary text-sm">{countryName(item.country)}</span>
+                      </div>
+                      <span className="text-sm font-bold text-text-primary">{item.count}</span>
+                    </div>
+                    <div className="flex gap-2 text-xs">
+                      <span className="text-success">{rates?.approved ?? 0} approved</span>
+                      <span className="text-text-muted">•</span>
+                      <span className="text-danger">{rates?.denied ?? 0} denied</span>
+                    </div>
+                  </div>
+                );
+              })
+            )}
           </div>
         </div>
 
@@ -632,32 +733,34 @@ export default function AdminDashboard() {
             </div>
           </div>
           <div className="space-y-3">
-            {[
-              { country: "Germany", flag: "🇩🇪", rate: 94.4, total: 54 },
-              { country: "United States", flag: "🇺🇸", rate: 93.9, total: 98 },
-              { country: "United Kingdom", flag: "🇬🇧", rate: 93.1, total: 87 },
-              { country: "India", flag: "🇮🇳", rate: 89.5, total: 76 },
-              { country: "Nigeria", flag: "🇳🇬", rate: 82.8, total: 145 },
-            ].map((item) => (
-              <div key={item.country}>
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg">{item.flag}</span>
-                    <span className="text-sm font-medium text-text-primary">{item.country}</span>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-sm font-bold text-success">{item.rate}%</p>
-                    <p className="text-xs text-text-muted">{item.total} total</p>
-                  </div>
-                </div>
-                <div className="h-2 bg-surface rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-success"
-                    style={{ width: `${item.rate}%` }}
-                  />
-                </div>
+            {approvalRatesLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="animate-spin text-text-muted" size={24} />
               </div>
-            ))}
+            ) : approvalRates.length === 0 ? (
+              <p className="text-sm text-text-muted text-center py-6">No approval data yet</p>
+            ) : (
+              [...approvalRates]
+                .sort((a, b) => b.approval_rate - a.approval_rate)
+                .slice(0, 5)
+                .map((item) => (
+                  <div key={item.country}>
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <span className="text-lg">{countryFlag(item.country)}</span>
+                        <span className="text-sm font-medium text-text-primary">{countryName(item.country)}</span>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm font-bold text-success">{item.approval_rate}%</p>
+                        <p className="text-xs text-text-muted">{item.total} total</p>
+                      </div>
+                    </div>
+                    <div className="h-2 bg-surface rounded-full overflow-hidden">
+                      <div className="h-full bg-success" style={{ width: `${item.approval_rate}%` }} />
+                    </div>
+                  </div>
+                ))
+            )}
           </div>
         </div>
       </div>

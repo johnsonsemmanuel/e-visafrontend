@@ -52,6 +52,18 @@ interface ExceptionsReport {
   overrides: Array<{ id: number; traveler_name: string; officer: string; notes: string; time: string }>;
 }
 
+function downloadCsv(filename: string, headers: string[], rows: string[][]) {
+  const escape = (v: string | number) => `"${String(v).replace(/"/g, '""')}"`;
+  const csv = [headers.map(escape).join(","), ...rows.map(r => r.map(escape).join(","))].join("\n");
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 export default function BorderReportsPage() {
   const [selectedPort, setSelectedPort] = useState("KIA");
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split("T")[0]);
@@ -103,7 +115,32 @@ export default function BorderReportsPage() {
             <option value="AFL">Aflao</option>
             <option value="ELB">Elubo</option>
           </select>
-          <Button variant="secondary" size="sm">
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => {
+              const rows: string[][] = [];
+              arrivals?.by_flight?.forEach((f) =>
+                rows.push([selectedDate, selectedPort, "Arrival", f.flight_number, f.airline, String(f.count), "", ""])
+              );
+              if (outcomes) {
+                Object.entries(outcomes.by_status).forEach(([status, count]) =>
+                  rows.push([selectedDate, selectedPort, "Outcome", "", "", String(count), status, ""])
+                );
+              }
+              alerts?.alerts?.forEach((a) =>
+                rows.push([selectedDate, a.port, "Alert", "", a.traveler_name, "", a.notes, a.time])
+              );
+              productivity?.by_officer?.forEach((o) =>
+                rows.push([selectedDate, selectedPort, "Productivity", "", o.officer_name, String(o.cases_processed), "", ""])
+              );
+              downloadCsv(
+                `border_report_${selectedPort}_${selectedDate}.csv`,
+                ["Date", "Port", "Category", "Flight", "Name", "Count", "Status/Notes", "Time"],
+                rows
+              );
+            }}
+          >
             <Download size={14} className="mr-1" /> Export
           </Button>
         </div>

@@ -41,6 +41,18 @@ interface FlightArrival {
   status: "arrived" | "processing" | "cleared" | "pending";
 }
 
+function downloadCsv(filename: string, headers: string[], rows: string[][]) {
+  const escape = (v: string | number) => `"${String(v).replace(/"/g, '""')}"`;
+  const csv = [headers.map(escape).join(","), ...rows.map(r => r.map(escape).join(","))].join("\n");
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 export default function BorderOperationsPage() {
   const [selectedPort, setSelectedPort] = useState("KIA");
   const [timeRange, setTimeRange] = useState<"hourly" | "daily">("daily");
@@ -106,7 +118,29 @@ export default function BorderOperationsPage() {
             <option value="ACC">Tema Port</option>
             <option value="AFL">Aflao Border</option>
           </select>
-          <Button variant="secondary" size="sm">
+          <Button
+            variant="secondary"
+            size="sm"
+            onClick={() => {
+              const today = new Date().toISOString().split("T")[0];
+              const rows: string[][] = [];
+              lanes.forEach((l) =>
+                rows.push(["Lane", l.name, l.officer, l.status, String(l.cases_processed), `${l.avg_time}s`])
+              );
+              flights.forEach((f) =>
+                rows.push(["Flight", f.flight_number, `${f.airline} (${f.origin})`, f.status, `${f.processed}/${f.passengers}`, f.eta])
+              );
+              rows.push(["Summary", "Entries", String(shiftStats.entries_processed), "", "", ""]);
+              rows.push(["Summary", "Exits", String(shiftStats.exits_processed), "", "", ""]);
+              rows.push(["Summary", "SLA Compliance", `${shiftStats.sla_compliance}%`, "", "", ""]);
+              rows.push(["Summary", "Watchlist Hits", String(shiftStats.watchlist_hits), "", "", ""]);
+              downloadCsv(
+                `border_operations_${selectedPort}_${today}.csv`,
+                ["Category", "Item", "Detail", "Status", "Count", "Time"],
+                rows
+              );
+            }}
+          >
             <Download size={16} className="mr-1" /> Export Report
           </Button>
         </div>
